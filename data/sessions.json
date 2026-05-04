@@ -1,0 +1,22 @@
+[
+  {
+    "id": "session-fe22e18b",
+    "goal_id": "goal-74d74c4a",
+    "task_id": "task-d00b5fa9",
+    "started_at": "2026-05-04T13:46:27",
+    "duration_seconds": 1500,
+    "session_type": "pomodoro",
+    "status": "completed",
+    "notes": ""
+  },
+  {
+    "id": "session-a21e53d4",
+    "goal_id": "goal-74d74c4a",
+    "task_id": "task-d00b5fa9",
+    "started_at": "2026-05-04T13:51:53",
+    "duration_seconds": 300,
+    "session_type": "short_break",
+    "status": "completed",
+    "notes": ""
+  }
+]
