@@ -1,10 +1,97 @@
-.venv/
+# Byte-compiled / optimized / DLL files
 __pycache__/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-build/
-dist/
-*.egg-info/
+*.py[codz]
+*$py.class
 
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.envrc
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Tests / coverage / caches
+.coverage
+.coverage.*
+.cache
+.hypothesis/
+.mypy_cache/
+.nox/
+.pytest_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+.tox/
+cover/
+coverage.xml
+dmypy.json
+htmlcov/
+nosetests.xml
+*.cover
+*.py.cover
+
+# Type checker and tooling
+.pdm-build/
+.pdm-python
+.pybuilder/
+.ropeproject/
+.spyderproject
+.spyproject
+cython_debug/
+tempCodeRunnerFile.py
+
+# Logs / local databases
+*.log
+*.pid
+db.sqlite3
+db.sqlite3-journal
+pip-delete-this-directory.txt
+pip-log.txt
+
+# Notebooks / docs / IDEs
+.ipynb_checkpoints/
+docs/_build/
+profile_default/
+target/
+
+# Framework-specific
+.abstra/
+.scrapy/
+.streamlit/secrets.toml
+instance/
+local_settings.py
+marimo/_lsp/
+marimo/_static/
+__marimo__/
+.webassets-cache
+
+# Optional environment managers / configs
+.pixi/
+__pypackages__/
+.pypirc
