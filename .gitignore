@@ -37,6 +37,7 @@ env.bak/
 venv.bak/
 
 # Tests / coverage / caches
+.artifacts/
 .coverage
 .coverage.*
 .cache

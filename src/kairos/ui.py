@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from datetime import date
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import (
-    QGroupBox,
+    QAbstractItemView,
+    QFrame,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -24,25 +25,25 @@ from .storage import FocusSession, Goal, JsonStore, Task, TodayPlan, TodayPlanIt
 
 APP_STYLESHEET = """
 QMainWindow, QWidget {
-    background-color: #f5f6f8;
-    color: #1f2937;
+    background-color: #f6f7f9;
+    color: #182230;
     font-size: 14px;
 }
 QWidget#appShell {
-    background-color: #f5f6f8;
+    background-color: #f6f7f9;
 }
 QWidget#sidebarPanel {
-    background-color: #ffffff;
-    border: 1px solid #d9dee7;
-    border-radius: 12px;
+    background-color: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 8px;
 }
 QLabel#brandTitle {
-    color: #111827;
-    font-size: 20px;
+    color: #ffffff;
+    font-size: 21px;
     font-weight: 700;
 }
 QLabel#brandSubtitle {
-    color: #6b7280;
+    color: #aeb8c7;
     font-size: 12px;
 }
 QListWidget#sidebarNav {
@@ -52,97 +53,133 @@ QListWidget#sidebarNav {
     padding: 2px;
 }
 QListWidget#sidebarNav::item {
-    padding: 10px 12px;
-    border-radius: 8px;
+    padding: 12px 12px;
+    border-radius: 6px;
     margin: 4px 0;
-    color: #374151;
+    color: #cbd5e1;
 }
 QListWidget#sidebarNav::item:selected {
-    background: #e8f0fe;
-    color: #1d4ed8;
-    border: 1px solid #c9dafd;
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid #ffffff;
     font-weight: 600;
 }
 QListWidget#sidebarNav::item:hover:!selected {
-    background: #f3f4f6;
+    background: #1f2937;
+    color: #ffffff;
 }
 QLabel#pageTitle {
-    color: #111827;
-    font-size: 28px;
+    color: #101828;
+    font-size: 32px;
     font-weight: 700;
 }
 QLabel#pageSubtitle {
-    color: #6b7280;
-    font-size: 12px;
+    color: #667085;
+    font-size: 13px;
 }
 QLabel#sectionTitle {
-    color: #111827;
+    color: #101828;
     font-size: 16px;
     font-weight: 700;
 }
-QWidget#card, QGroupBox {
-    background-color: #ffffff;
-    border: 1px solid #d9dee7;
-    border-radius: 12px;
-    margin-top: 10px;
-    padding-top: 10px;
+QLabel#focusTitle {
+    color: #101828;
+    font-size: 24px;
+    font-weight: 700;
 }
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 12px;
-    padding: 0 4px;
-    color: #4b5563;
+QLabel#panelEyebrow {
+    color: #667085;
+    font-size: 11px;
+    font-weight: 700;
+}
+QLabel#statValue {
+    color: #101828;
+    font-size: 22px;
+    font-weight: 700;
+}
+QLabel#statLabel {
+    color: #667085;
+    font-size: 12px;
     font-weight: 600;
+}
+QLabel#itemTitle {
+    color: #111827;
+    font-size: 14px;
+    font-weight: 700;
+}
+QLabel#itemMeta {
+    color: #667085;
+    font-size: 12px;
+}
+QWidget#workItem {
+    background-color: transparent;
+}
+QWidget#card, QFrame#panel, QFrame#heroPanel {
+    background-color: #ffffff;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+}
+QFrame#statCard {
+    background-color: #ffffff;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+}
+QFrame#heroPanel {
+    border: 1px solid #bccdf5;
 }
 QPushButton {
     background-color: #ffffff;
-    color: #1f2937;
-    border: 1px solid #cfd6e2;
-    border-radius: 8px;
-    padding: 8px 14px;
+    color: #182230;
+    border: 1px solid #d0d7e2;
+    border-radius: 6px;
+    padding: 9px 15px;
     font-weight: 600;
 }
 QPushButton:hover {
-    background-color: #f9fafb;
+    background-color: #f8fafc;
 }
 QPushButton#primaryButton {
-    background-color: #2563eb;
+    background-color: #155eef;
     color: #ffffff;
-    border: 1px solid #2563eb;
+    border: 1px solid #155eef;
 }
 QPushButton#primaryButton:hover {
-    background-color: #1d4ed8;
+    background-color: #004eeb;
 }
 QPushButton#secondaryButton {
-    background-color: #eef4ff;
-    color: #1d4ed8;
-    border: 1px solid #cfe0ff;
+    background-color: #f3f7ff;
+    color: #155eef;
+    border: 1px solid #c9d9ff;
 }
 QPushButton#ghostButton {
-    color: #6b7280;
+    background-color: transparent;
+    color: #667085;
 }
 QPushButton:disabled {
-    background-color: #f3f4f6;
-    color: #9ca3af;
-    border: 1px solid #e5e7eb;
+    background-color: #f1f5f9;
+    color: #98a2b3;
+    border: 1px solid #e2e8f0;
 }
 QListWidget {
     background-color: #ffffff;
-    border: 1px solid #d2d9e3;
-    border-radius: 8px;
-    padding: 8px;
+    border: 1px solid #e1e7ef;
+    border-radius: 6px;
+    padding: 5px;
 }
 QListWidget::item {
     background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 10px 12px;
+    border: 1px solid #edf1f6;
+    border-radius: 6px;
+    padding: 8px;
     margin: 4px 0;
 }
 QListWidget::item:selected {
-    background-color: #eef4ff;
-    border: 1px solid #cfe0ff;
-    color: #111827;
+    background-color: #f2f7ff;
+    border: 1px solid #adc8ff;
+    color: #101828;
+}
+QListWidget::item:hover:!selected {
+    background-color: #fafbfc;
 }
 """
 
@@ -157,10 +194,58 @@ def make_label(text: str, object_name: str) -> QLabel:
     return label
 
 
+def make_stat_card(label: str) -> tuple[QFrame, QLabel]:
+    card = QFrame()
+    card.setObjectName("statCard")
+    layout = QVBoxLayout(card)
+    layout.setContentsMargins(16, 12, 16, 12)
+    layout.setSpacing(4)
+    value_label = make_label("0", "statValue")
+    label_widget = make_label(label, "statLabel")
+    layout.addWidget(value_label)
+    layout.addWidget(label_widget)
+    return card, value_label
+
+
+def make_panel(title: str, subtitle: str | None = None) -> tuple[QFrame, QVBoxLayout]:
+    panel = QFrame()
+    panel.setObjectName("panel")
+    layout = QVBoxLayout(panel)
+    layout.setContentsMargins(18, 16, 18, 18)
+    layout.setSpacing(12)
+    header = QVBoxLayout()
+    header.setSpacing(3)
+    header.addWidget(make_label(title, "sectionTitle"))
+    if subtitle:
+        subtitle_label = make_label(subtitle, "pageSubtitle")
+        subtitle_label.setWordWrap(True)
+        header.addWidget(subtitle_label)
+    layout.addLayout(header)
+    return panel, layout
+
+
+def add_work_item(list_widget: QListWidget, title: str, meta: str) -> None:
+    item = QListWidgetItem()
+    row = QWidget()
+    row.setObjectName("workItem")
+    row_layout = QVBoxLayout(row)
+    row_layout.setContentsMargins(10, 8, 10, 8)
+    row_layout.setSpacing(4)
+    title_label = make_label(title, "itemTitle")
+    title_label.setWordWrap(True)
+    meta_label = make_label(meta, "itemMeta")
+    meta_label.setWordWrap(True)
+    row_layout.addWidget(title_label)
+    row_layout.addWidget(meta_label)
+    item.setSizeHint(QSize(0, 82))
+    list_widget.addItem(item)
+    list_widget.setItemWidget(item, row)
+
+
 def create_page(widget: QWidget) -> QVBoxLayout:
     layout = QVBoxLayout(widget)
-    layout.setContentsMargins(24, 24, 24, 24)
-    layout.setSpacing(16)
+    layout.setContentsMargins(30, 28, 30, 28)
+    layout.setSpacing(20)
     return layout
 
 
@@ -312,25 +397,41 @@ class TodayPage(QWidget):
 
         layout = create_page(self)
 
+        header_row = QHBoxLayout()
+        header_row.setSpacing(18)
+        header_text = QVBoxLayout()
+        header_text.setSpacing(4)
         self.title_label = make_label("Today", "pageTitle")
         self.subtitle_label = make_label(
-            "Plan the day, pick the next block, and start working.",
+            "Plan the day, choose a small queue, and move one useful task forward.",
             "pageSubtitle",
         )
         self.subtitle_label.setWordWrap(True)
-        self.summary_label = make_label("", "pageSubtitle")
-        self.summary_label.setWordWrap(True)
+        self.date_label = make_label(date.today().strftime("%A, %d %b %Y"), "panelEyebrow")
+        header_text.addWidget(self.date_label)
+        header_text.addWidget(self.title_label)
+        header_text.addWidget(self.subtitle_label)
+        header_row.addLayout(header_text, 1)
 
-        layout.addWidget(self.title_label)
-        layout.addWidget(self.subtitle_label)
-        layout.addWidget(self.summary_label)
+        stats_row = QHBoxLayout()
+        stats_row.setSpacing(12)
+        active_card, self.active_goals_value = make_stat_card("Active goals")
+        planned_card, self.planned_today_value = make_stat_card("Planned today")
+        minutes_card, self.focus_minutes_value = make_stat_card("Focus minutes")
+        stats_row.addWidget(active_card, 1)
+        stats_row.addWidget(planned_card, 1)
+        stats_row.addWidget(minutes_card, 1)
+        header_row.addLayout(stats_row, 1)
+        layout.addLayout(header_row)
 
-        self.next_focus_card = QGroupBox("Next focus")
+        self.next_focus_card = QFrame()
+        self.next_focus_card.setObjectName("heroPanel")
         next_focus_layout = QVBoxLayout(self.next_focus_card)
-        next_focus_layout.setContentsMargins(18, 20, 18, 18)
-        next_focus_layout.setSpacing(10)
+        next_focus_layout.setContentsMargins(22, 18, 22, 20)
+        next_focus_layout.setSpacing(12)
 
-        self.suggestion_label = make_label("", "sectionTitle")
+        next_focus_layout.addWidget(make_label("NEXT FOCUS", "panelEyebrow"))
+        self.suggestion_label = make_label("", "focusTitle")
         self.suggestion_label.setWordWrap(True)
         self.reason_label = make_label("", "pageSubtitle")
         self.reason_label.setWordWrap(True)
@@ -346,14 +447,12 @@ class TodayPage(QWidget):
         content_row = QHBoxLayout()
         content_row.setSpacing(16)
 
-        queue_card = QGroupBox("Today's queue")
-        queue_layout = QVBoxLayout(queue_card)
-        queue_layout.setContentsMargins(18, 20, 18, 18)
-        queue_layout.setSpacing(10)
-        queue_hint = make_label("Keep the queue small. Limit it to 3 items.", "pageSubtitle")
-        queue_hint.setWordWrap(True)
+        queue_card, queue_layout = make_panel("Today's queue", "Keep the queue tight. Three items is enough.")
         self.today_plan_list = QListWidget()
-        self.today_plan_list.setMinimumHeight(320)
+        self.today_plan_list.setMinimumHeight(340)
+        self.today_plan_list.setSpacing(3)
+        self.today_plan_list.setUniformItemSizes(False)
+        self.today_plan_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.remove_from_today_button = QPushButton("Remove selected")
         self.remove_from_today_button.setObjectName("secondaryButton")
         self.remove_from_today_button.clicked.connect(self.remove_selected_from_today)
@@ -365,18 +464,15 @@ class TodayPage(QWidget):
         queue_actions.addWidget(self.remove_from_today_button)
         queue_actions.addWidget(self.clear_today_button)
         queue_actions.addStretch(1)
-        queue_layout.addWidget(queue_hint)
         queue_layout.addWidget(self.today_plan_list, 1)
         queue_layout.addLayout(queue_actions)
 
-        available_card = QGroupBox("Available work")
-        available_layout = QVBoxLayout(available_card)
-        available_layout.setContentsMargins(18, 20, 18, 18)
-        available_layout.setSpacing(10)
-        available_hint = make_label("Pick the next item worth pulling into today.", "pageSubtitle")
-        available_hint.setWordWrap(True)
+        available_card, available_layout = make_panel("Available work", "Pull in only what deserves attention today.")
         self.available_work_list = QListWidget()
-        self.available_work_list.setMinimumHeight(320)
+        self.available_work_list.setMinimumHeight(340)
+        self.available_work_list.setSpacing(3)
+        self.available_work_list.setUniformItemSizes(False)
+        self.available_work_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.add_to_today_button = QPushButton("Add to today")
         self.add_to_today_button.setObjectName("primaryButton")
         self.add_to_today_button.clicked.connect(self.add_selected_to_today)
@@ -384,12 +480,11 @@ class TodayPage(QWidget):
         available_actions.setSpacing(10)
         available_actions.addWidget(self.add_to_today_button)
         available_actions.addStretch(1)
-        available_layout.addWidget(available_hint)
         available_layout.addWidget(self.available_work_list, 1)
         available_layout.addLayout(available_actions)
 
-        content_row.addWidget(queue_card, 1)
-        content_row.addWidget(available_card, 1)
+        content_row.addWidget(queue_card, 3)
+        content_row.addWidget(available_card, 2)
         layout.addLayout(content_row)
 
         self.empty_label = make_label(
@@ -418,9 +513,9 @@ class TodayPage(QWidget):
         total_minutes = sum(session.duration_seconds for session in completed_focus_sessions(sessions)) // 60
         planned_candidates = planned_focus_candidates(goals, today_plan)
 
-        self.summary_label.setText(
-            f"{len(active_goals)} active goals • {len(planned_candidates)} planned today • {total_minutes} focus minutes completed"
-        )
+        self.active_goals_value.setText(str(len(active_goals)))
+        self.planned_today_value.setText(f"{len(planned_candidates)}/3")
+        self.focus_minutes_value.setText(str(total_minutes))
 
         self.today_plan_list.clear()
         self.available_work_list.clear()
@@ -448,24 +543,28 @@ class TodayPage(QWidget):
                 self.start_button.setEnabled(False)
             elif suggested_task is None:
                 self.suggestion_label.setText(suggested_goal.title)
-                self.reason_label.setText(f"{target_date_badge(suggested_goal.target_date)} • Focus at the goal level.")
+                self.reason_label.setText(
+                    f"{target_date_badge(suggested_goal.target_date)} • {suggested_goal.category} • Goal-level focus"
+                )
                 self.start_button.setEnabled(True)
             else:
-                self.suggestion_label.setText(f"{suggested_goal.title} -> {suggested_task.title}")
+                self.suggestion_label.setText(f"{suggested_goal.title}: {suggested_task.title}")
                 self.reason_label.setText(
-                    f"{target_date_badge(suggested_goal.target_date)} • Picked from {suggested_goal.category}."
+                    f"{target_date_badge(suggested_goal.target_date)} • {suggested_goal.category} • {suggested_task.status.replace('_', ' ')}"
                 )
                 self.start_button.setEnabled(True)
 
         planned_lookup = {(item.goal_id, item.task_id) for item in today_plan.items}
         for goal, task in planned_candidates:
             if task is None:
-                label = f"{priority_display(goal, execution_order)} • {goal.title} • goal-level focus"
+                title = goal.title
+                meta = f"{priority_display(goal, execution_order)} • {target_date_badge(goal.target_date)} • goal-level focus"
                 key = (goal.id, None)
             else:
-                label = f"{priority_display(goal, execution_order)} • {goal.title} -> {task.title}"
+                title = task.title
+                meta = f"{priority_display(goal, execution_order)} • {goal.title} • {task.status.replace('_', ' ')}"
                 key = (goal.id, task.id)
-            self.today_plan_list.addItem(label)
+            add_work_item(self.today_plan_list, title, meta)
             self.planned_targets.append(key)
 
         for goal in sorted_goals(active_goals):
@@ -475,23 +574,31 @@ class TodayPage(QWidget):
                     key = (goal.id, task.id)
                     if key in planned_lookup:
                         continue
-                    self.available_work_list.addItem(
-                        f"{priority_display(goal, execution_order)} • {goal.title} -> {task.title}"
+                    add_work_item(
+                        self.available_work_list,
+                        task.title,
+                        f"{priority_display(goal, execution_order)} • {goal.title} • {target_date_badge(goal.target_date)}",
                     )
                     self.available_targets.append(key)
             else:
                 key = (goal.id, None)
                 if key in planned_lookup:
                     continue
-                self.available_work_list.addItem(
-                    f"{priority_display(goal, execution_order)} • {goal.title} • goal-level focus"
+                add_work_item(
+                    self.available_work_list,
+                    goal.title,
+                    f"{priority_display(goal, execution_order)} • {target_date_badge(goal.target_date)} • goal-level focus",
                 )
                 self.available_targets.append(key)
 
         if not planned_candidates:
-            self.today_plan_list.addItem("No plan yet. Add 1-3 items for today.")
+            add_work_item(self.today_plan_list, "No plan yet", "Add 1-3 items for today.")
         if not self.available_targets:
-            self.available_work_list.addItem("No more actionable items outside today's plan.")
+            add_work_item(
+                self.available_work_list,
+                "No more actionable work",
+                "Everything ready is already in today's queue.",
+            )
 
     def add_selected_to_today(self) -> None:
         index = self.available_work_list.currentRow()
@@ -569,21 +676,21 @@ class MainWindow(QMainWindow):
         self.tray_icon: QSystemTrayIcon | None = None
 
         self.setWindowTitle("Kairos")
-        self.resize(1180, 780)
+        self.resize(1240, 820)
         self.setStyleSheet(APP_STYLESHEET)
 
         container = QWidget()
         container.setObjectName("appShell")
         shell_layout = QHBoxLayout(container)
-        shell_layout.setContentsMargins(12, 12, 12, 12)
-        shell_layout.setSpacing(12)
+        shell_layout.setContentsMargins(14, 14, 14, 14)
+        shell_layout.setSpacing(14)
 
         sidebar_panel = QWidget()
         sidebar_panel.setObjectName("sidebarPanel")
-        sidebar_panel.setFixedWidth(220)
+        sidebar_panel.setFixedWidth(232)
         sidebar_layout = QVBoxLayout(sidebar_panel)
-        sidebar_layout.setContentsMargins(16, 18, 16, 18)
-        sidebar_layout.setSpacing(12)
+        sidebar_layout.setContentsMargins(18, 20, 18, 18)
+        sidebar_layout.setSpacing(14)
         sidebar_layout.addWidget(make_label("Kairos", "brandTitle"))
         sidebar_layout.addWidget(make_label("Plan clearly. Focus steadily.", "brandSubtitle"))
 

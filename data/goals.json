@@ -2,7 +2,7 @@
   {
     "id": "goal-74d74c4a",
     "title": "Langchain",
-    "category": "Learning",
+    "category": "learning",
     "priority": "P1",
     "target_date": "2026-05-18",
     "status": "active",
@@ -35,7 +35,7 @@
   {
     "id": "goal-08da9770",
     "title": "FastAPI",
-    "category": "Learning",
+    "category": "learning",
     "priority": "P2",
     "target_date": "2026-05-25",
     "status": "active",
@@ -68,7 +68,7 @@
   {
     "id": "goal-3978a1f0",
     "title": "Langpraph",
-    "category": "Learning",
+    "category": "learning",
     "priority": "P3",
     "target_date": "2026-05-29",
     "status": "active",
@@ -97,5 +97,27 @@
         "created_at": "2026-05-04T15:35:32"
       }
     ]
+  },
+  {
+    "id": "goal-b62b97c3",
+    "title": "CodeMitra",
+    "category": "career",
+    "priority": "P2",
+    "target_date": "2026-05-18",
+    "status": "active",
+    "notes": "",
+    "created_at": "2026-05-06T12:25:13",
+    "tasks": []
+  },
+  {
+    "id": "goal-511a2eef",
+    "title": "Med_RAG_Bot",
+    "category": "career",
+    "priority": "P2",
+    "target_date": "2026-05-30",
+    "status": "active",
+    "notes": "",
+    "created_at": "2026-05-10T09:41:36",
+    "tasks": []
   }
 ]

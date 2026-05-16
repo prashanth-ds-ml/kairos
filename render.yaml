@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: kairos
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --chdir src kairos.web:app
+    envVars:
+      - key: KAIROS_STORAGE
+        value: mongodb
+      - key: KAIROS_MONGODB_URI
+        sync: false
+      - key: KAIROS_MONGODB_DATABASE
+        value: kairos
+      - key: KAIROS_SECRET_KEY
+        generateValue: true
+      - key: KAIROS_ACCESS_KEY
+        sync: false

@@ -1,0 +1,56 @@
+[
+  {
+    "id": "career",
+    "name": "Career",
+    "desired_state": "Become valuable through shipped work and opportunity creation.",
+    "current_score": 5,
+    "weekly_target_minutes": 0,
+    "notes": "",
+    "updated_at": "2026-05-09T12:04:37"
+  },
+  {
+    "id": "learning",
+    "name": "Learning",
+    "desired_state": "Build durable skills through practice and proof of work.",
+    "current_score": 5,
+    "weekly_target_minutes": 0,
+    "notes": "",
+    "updated_at": "2026-05-09T12:04:37"
+  },
+  {
+    "id": "health",
+    "name": "Health",
+    "desired_state": "Protect energy, body, and baseline discipline.",
+    "current_score": 5,
+    "weekly_target_minutes": 0,
+    "notes": "",
+    "updated_at": "2026-05-09T12:04:37"
+  },
+  {
+    "id": "money",
+    "name": "Money",
+    "desired_state": "Improve financial clarity and long-term options.",
+    "current_score": 5,
+    "weekly_target_minutes": 0,
+    "notes": "",
+    "updated_at": "2026-05-09T12:04:37"
+  },
+  {
+    "id": "relationships",
+    "name": "Relationships",
+    "desired_state": "Invest in people who matter.",
+    "current_score": 5,
+    "weekly_target_minutes": 0,
+    "notes": "",
+    "updated_at": "2026-05-09T12:04:37"
+  },
+  {
+    "id": "systems",
+    "name": "Personal Systems",
+    "desired_state": "Design routines, environment, and habits that make execution easier.",
+    "current_score": 5,
+    "weekly_target_minutes": 0,
+    "notes": "",
+    "updated_at": "2026-05-09T12:04:37"
+  }
+]

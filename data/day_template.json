@@ -1,0 +1,137 @@
+{
+  "day_start": "06:00",
+  "day_end": "22:00",
+  "blocks": [
+    {
+      "id": "template-4edb6479",
+      "start_time": "06:00",
+      "end_time": "06:30",
+      "kind": "buffer",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Wake up and drink water",
+      "note": "i need to wake up early so that i have time to do my things"
+    },
+    {
+      "id": "template-ecf4851e",
+      "start_time": "06:30",
+      "end_time": "07:00",
+      "kind": "meditation",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Meditation and breath work",
+      "note": "rewire brain and balance stress build healthy habits"
+    },
+    {
+      "id": "template-6615b957",
+      "start_time": "07:00",
+      "end_time": "07:30",
+      "kind": "exercise",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Exercise and bath",
+      "note": "Building exercise habit for good functional body"
+    },
+    {
+      "id": "template-c34f5208",
+      "start_time": "07:30",
+      "end_time": "07:45",
+      "kind": "buffer",
+      "goal_id": "",
+      "task_id": null,
+      "title": "buffer time if anything gets late",
+      "note": ""
+    },
+    {
+      "id": "template-cf5a67d6",
+      "start_time": "07:45",
+      "end_time": "09:15",
+      "kind": "deep_work",
+      "goal_id": "",
+      "task_id": null,
+      "title": "",
+      "note": "This has to be my deep work block where i will pick anything from the goals and do"
+    },
+    {
+      "id": "template-6bd50118",
+      "start_time": "09:15",
+      "end_time": "09:45",
+      "kind": "personal",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Breakfast",
+      "note": ""
+    },
+    {
+      "id": "template-e4fbf7c4",
+      "start_time": "09:45",
+      "end_time": "17:30",
+      "kind": "deep_work",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Office Time",
+      "note": ""
+    },
+    {
+      "id": "template-955d59aa",
+      "start_time": "17:30",
+      "end_time": "18:00",
+      "kind": "personal",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Travel",
+      "note": ""
+    },
+    {
+      "id": "template-49fbffd0",
+      "start_time": "18:00",
+      "end_time": "18:30",
+      "kind": "recovery",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Freshen up",
+      "note": ""
+    },
+    {
+      "id": "template-09a190bb",
+      "start_time": "18:30",
+      "end_time": "19:45",
+      "kind": "deep_work",
+      "goal_id": "",
+      "task_id": null,
+      "title": "",
+      "note": ""
+    },
+    {
+      "id": "template-dc5f6344",
+      "start_time": "19:45",
+      "end_time": "21:00",
+      "kind": "recovery",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Dinner and relax",
+      "note": ""
+    },
+    {
+      "id": "template-0692e8ca",
+      "start_time": "21:00",
+      "end_time": "21:30",
+      "kind": "meditation",
+      "goal_id": "",
+      "task_id": null,
+      "title": "",
+      "note": ""
+    },
+    {
+      "id": "template-30f313fd",
+      "start_time": "21:30",
+      "end_time": "21:55",
+      "kind": "recovery",
+      "goal_id": "",
+      "task_id": null,
+      "title": "Sleep",
+      "note": ""
+    }
+  ],
+  "updated_at": "2026-05-12T14:02:56"
+}

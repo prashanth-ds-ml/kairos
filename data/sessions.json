@@ -7,7 +7,10 @@
     "duration_seconds": 1500,
     "session_type": "pomodoro",
     "status": "completed",
-    "notes": ""
+    "notes": "",
+    "internal_trigger": "",
+    "external_trigger": "",
+    "pact": ""
   },
   {
     "id": "session-a21e53d4",
@@ -17,6 +20,22 @@
     "duration_seconds": 300,
     "session_type": "short_break",
     "status": "completed",
-    "notes": ""
+    "notes": "",
+    "internal_trigger": "",
+    "external_trigger": "",
+    "pact": ""
+  },
+  {
+    "id": "session-8bef0b56",
+    "goal_id": "goal-511a2eef",
+    "task_id": null,
+    "started_at": "2026-05-12T15:49:19",
+    "duration_seconds": 1500,
+    "session_type": "pomodoro",
+    "status": "completed",
+    "notes": "Commitment: Research | Friction: Low energy | Result: less focus on the task and sleepy",
+    "internal_trigger": "Boredom",
+    "external_trigger": "Phone",
+    "pact": ""
   }
 ]
