@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "answer-c9116277",
+    "question_id": "autonomy",
+    "prompt": "I feel that my current goals are chosen by me, not just inherited from pressure or comparison.",
+    "response_type": "likert",
+    "answer": "Agree",
+    "construct": "autonomy",
+    "section": "Motivation",
+    "source": "Self-Determination Theory inspired",
+    "created_at": "2026-05-18T14:52:18"
+  }
+]

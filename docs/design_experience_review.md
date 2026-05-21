@@ -1,8 +1,8 @@
 # Kairos Design Experience Review
 
 Role: Product Designer / UX Designer  
-Review date: 2026-05-16  
-Reviewed screens: Today, North Star, Areas, Focus, Goals, Weekly, Review, Coach on desktop and mobile.
+Review date: 2026-05-18  
+Reviewed screens: Today, North Star, Season, Brain, Areas, Focus, Goals, Weekly, Review, Research, Coach on desktop and mobile.
 
 ## Executive Summary
 
@@ -11,12 +11,15 @@ Kairos has the right product shape: it is not just a timer, and it is not just a
 The main design opportunity is to make the app feel like a guided behavioral operating system instead of a set of forms and dashboards. The current UI is functional and clear, but it puts too much responsibility on the user to know what to do next. The next design phase should reduce decision load, create stronger page hierarchy, and make each screen answer one question:
 
 - Today: What should I do now?
+- Season: What is protected for the next 21 days?
 - Focus: What am I committing to for this block?
 - Weekly: What is realistic this week?
 - Goals: What outcome am I progressing?
 - North Star: Why does this work matter?
 - Areas: Which part of life needs attention?
 - Review: What pattern is emerging, and what should change?
+- Brain: What have I learned about myself?
+- Research: What source-backed insight is worth keeping?
 - Coach: Where am I stuck?
 
 Current implementation note:
@@ -27,7 +30,19 @@ Current implementation note:
 - Review now includes charts for focus, area balance, goal progress, outcome mix, and triggers.
 - Areas now behaves as a scorecard with overview metrics first.
 - Weekly now supports capacity planning, goal allocation, and rollover.
+- Season is now the 21-day operating agreement and should be the main bridge between long-term direction and daily execution.
+- Brain now leads with recommended questions and keeps the full 121-question library collapsed.
+- Research now supports a source-backed search, read, save flow that feeds Brain memory.
 - Coach uses Hugging Face Inference Providers and `Qwen/Qwen2.5-7B-Instruct-1M`, with local deterministic fallback when the provider is unavailable.
+
+2026-05-18 Playwright audit:
+
+- Today: usable as the daily command center; suggested reflection is visible and useful for slow, incremental Brain growth.
+- Season: serviceable as the primary 21-day planning surface; checkpoint notes are correctly secondary.
+- Brain: the top recommended questions now work better than a long intake; the full library should remain collapsed by default.
+- Research: the flow is clear enough for local use, but the next iteration should make the source-backed answer and saved discussion feel closer to a Perplexity thread.
+- Weekly and Review: dense but acceptable because they are weekly surfaces, not daily starting points.
+- North Star: still more form-like than ideal; keep it as long-term direction and avoid making it compete with Season.
 
 2026-05-15 gap-fix implementation:
 
@@ -103,7 +118,7 @@ Recommended change:
 
 Use read-first, edit-on-demand sections. For example, Areas should first show the area score, desired state, weekly target, progress, and recommendation. The edit fields can appear after clicking "Edit".
 
-North Star should especially become read-first. The identity statement, current season focus, and 90-day outcomes should be the main surface. Editing should be secondary.
+North Star should especially become read-first. The identity statement, values, anti-vision, yearly direction, and priorities should be the main surface. Editing should be secondary. The current 21-day operating layer belongs in Season.
 
 ### 4. Focus Target Selection Is Too Long
 
@@ -207,7 +222,50 @@ Recommended design direction:
 - Add "current season" as the bridge between long-term vision and weekly planning.
 - Add a quarterly reset/review date.
 
-North Star should not be a daily form. It should be an identity reminder and seasonal alignment surface.
+North Star should not be a daily form. It should be an identity reminder and long-term alignment surface. Season should carry the current 21-day operating decision.
+
+## Season
+
+Current purpose: choose the protected 21-day track, support track, constraints, paused goals, evidence, and checkpoint rhythm.
+
+Recommended design direction:
+
+- Keep the top decision summary visible.
+- Keep edit fields available but secondary to the operating agreement.
+- Use Day 7, Day 14, and Day 21 checkpoints as decision moments.
+- Make Season the default source for Today auto-plan and Review evidence.
+- Avoid adding a 90-day planning layer until the 21-day loop is working from real usage data.
+
+Suggested Season layout:
+
+1. Current season summary: day, primary track, support track, next action.
+2. Evidence: focus minutes, daily minimum, weekly target, progress.
+3. Decision controls: apply suggested fields, update direction, pause/continue.
+4. Edit season details.
+5. Checkpoint notes.
+
+## Brain
+
+Current purpose: local cognitive mirror and question engine.
+
+Recommended design direction:
+
+- Show recommended questions first.
+- Keep the full question bank collapsed as a library.
+- Separate confirmed memories from candidate memories.
+- Make every durable memory editable and forgettable.
+- Avoid clinical or identity-fixed labels.
+
+## Research
+
+Current purpose: source-backed search, read, save memory.
+
+Recommended design direction:
+
+- Treat every search as a research session.
+- Keep source list, synthesized answer, selected source, and saved memory together.
+- Save only durable insight, not raw noise.
+- Make previous research sessions searchable and reusable by Brain and Coach.
 
 ## Areas
 

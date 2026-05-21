@@ -8,13 +8,28 @@ version = "0.1.0"
 description = "Local-first goal, life, and focus tracker."
 requires-python = ">=3.10"
 dependencies = [
-    "Flask>=3.0,<4",
-    "PySide6>=6.8,<7",
     "pymongo>=4.7,<5",
+    "rich>=13.7,<15",
+    "typer>=0.12,<1",
+]
+
+[project.optional-dependencies]
+web = [
+    "Flask>=3.0,<4",
+    "gunicorn>=22,<24",
+]
+desktop = [
+    "PySide6>=6.8,<7",
+]
+all = [
+    "Flask>=3.0,<4",
+    "gunicorn>=22,<24",
+    "PySide6>=6.8,<7",
 ]
 
 [project.scripts]
-kairos = "kairos.main:main"
+kairos = "kairos.cli:main"
+kairos-desktop = "kairos.main:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

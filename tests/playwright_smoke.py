@@ -42,6 +42,11 @@ def main() -> None:
         expect(page.get_by_text("Life direction")).to_be_visible()
         page.screenshot(path=str(ARTIFACT_DIR / "north-star-web.png"), full_page=True)
 
+        page.goto(f"{BASE_URL}/season", wait_until="networkidle")
+        expect(page.get_by_role("heading", name="Season", exact=True)).to_be_visible()
+        expect(page.get_by_text("Edit season")).to_be_visible()
+        page.screenshot(path=str(ARTIFACT_DIR / "season-web.png"), full_page=True)
+
         page.goto(f"{BASE_URL}/brain", wait_until="networkidle")
         expect(page.get_by_role("heading", name="Brain", exact=True)).to_be_visible()
         expect(page.get_by_text("Question engine")).to_be_visible()
@@ -65,7 +70,7 @@ def main() -> None:
 
         page.goto(f"{BASE_URL}/research", wait_until="networkidle")
         expect(page.get_by_role("heading", name="Research", exact=True)).to_be_visible()
-        expect(page.get_by_text("SearXNG search")).to_be_visible()
+        expect(page.get_by_role("heading", name="Research question")).to_be_visible()
         page.screenshot(path=str(ARTIFACT_DIR / "research-web.png"), full_page=True)
 
         mobile = browser.new_page(viewport={"width": 390, "height": 844}, is_mobile=True)

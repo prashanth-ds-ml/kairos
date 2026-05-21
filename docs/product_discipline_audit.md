@@ -1,7 +1,7 @@
 # Kairos Product Discipline Audit
 
 Role: Product Leader / Behavioral Product Manager  
-Review date: 2026-05-16
+Review date: 2026-05-18
 
 ## Product Thesis
 
@@ -12,6 +12,10 @@ The best version of Kairos is not a generic todo app. It is a personal operating
 2026-05-14 update:
 
 The product direction is now behavior-first. Kairos should reduce decision load at the point of action, guide the user through small loops, and treat missed plans as information. The central reference for this direction is `docs/psychological_product_blueprint.md`; the full documentation map is `docs/README.md`.
+
+2026-05-18 update:
+
+The primary operating track is now 21 days, not 90 days. Season is the active planning layer between North Star and Today. Brain and Research are memory layers that should improve Season, Today, Review, and Coach over repeated use.
 
 ## Behavioral Product Doctrine
 
@@ -37,17 +41,18 @@ This means the app should not expose every useful control at once. It should dec
 | Available work | Lists active goal tasks that can be added to today. | Gives the user a menu of meaningful work. | Useful | Add filters by priority, area, and due date. |
 | Auto-plan | Adds up to three focus candidates to today. | Reduces planning friction when the user feels stuck. | Basic | Make rules visible and favor P1/overdue/neglected areas. |
 | Next focus | Highlights one recommended focus target. | Reduces decision fatigue and helps the user start. | Strong | Make it the dominant top action on Today. |
+| Season | Stores the 21-day primary track, support track, success evidence, constraints, paused goals, and checkpoint notes. | Turns broad ambition into a short validation cycle with clear tradeoffs. | Implemented | Drive Today auto-plan and Review evidence directly from Season. |
 | Focus timer | Runs a single-task timer with start, pause, reset, and complete. | Converts intention into timed execution. | Good | Add result capture and distraction logging. |
 | Complete focus block | Records minutes and marks selected task done. | Creates evidence of progress and rewards completion. | Good | Support partial completion and blocked outcomes. |
 | Goals | Creates goals with category, priority, target date, notes, and tasks. | Converts ambitions into executable projects. | Good | Add goal health, next action, and weekly commitment. |
 | Task status | Supports todo, doing, done, and blocked. | Makes work state visible and reduces hidden ambiguity. | Good | Add blocked reason and unblock next step. |
-| North Star | Stores one-year vision, 90-day outcomes, season focus, identity, values, anti-vision, and priorities. | Connects daily work to identity and long-term direction. | Strong concept | Keep it read-first and connect it to Brain reflections. |
+| North Star | Stores long-term direction, identity, values, anti-vision, and priorities. | Connects daily work to identity and long-term direction. | Strong concept | Keep it read-first and let Season carry the current 21-day operating decision. |
 | Life areas | Tracks Career, Learning, Health, Money, Relationships, and Personal Systems. | Prevents career-only productivity and supports balanced growth. | Strong concept | Add weekly area budgets and attention warnings. |
 | Area weekly target minutes | Lets each area define expected weekly focus time. | Encourages intentional time allocation. | Basic | Compare target versus actual and recommend rebalancing. |
 | Area score | Rates each life area from 1-10. | Builds self-awareness and exposes neglected areas. | Basic | Trend score over time and prompt weekly reflection. |
 | Review | Shows weekly charts, completed sessions, planned vs actual, area balance, goal progress, triggers, and reflection prompts. | Turns behavior into learning and adjustment. | Implemented, needs sharper top insight | Lead with planned vs actual, main friction, best goal, neglected area, and suggested adjustment. |
-| Brain | Stores questionnaire answers, synthesized profile fields, and search-linked memory. | Builds a local cognitive mirror and improves personalization. | Implemented | Add explicit user confirmation before synthesis on some answers. |
-| Research | Search memory and read/save flow backed by local SearXNG. | Keeps useful search findings attached to goals, areas, and questions. | Implemented | Add forget/delete controls and richer reading notes. |
+| Brain | Stores questionnaire answers, editable profile fields, confirmed memories, memory candidates, and saved research. | Builds a local cognitive mirror and improves personalization. | Implemented | Add forget/delete controls and more pattern summaries. |
+| Research | Source-backed search, read/save sessions backed by local SearXNG. | Keeps useful search findings attached to goals, areas, questions, and Brain memory. | Implemented | Make sessions feel closer to a Perplexity-style answer thread. |
 | Coach | Contextual guidance from Hugging Face or local fallback. | Reduces friction at the moment of action. | Implemented, resilient | Add embedded prompts on decision-heavy screens. |
 | Access key | Optional simple personal protection for hosted use. | Keeps a personal app private without multi-user complexity. | Practical | Document deployment setup clearly. |
 | MongoDB support | Allows cloud persistence across machines. | Enables continuity from any device. | Practical | Add backup/export and connection health display. |
@@ -75,6 +80,7 @@ The largest current risk is not missing functionality. It is cognitive overload.
 Recommended product correction:
 
 - Today becomes a Now-first command center.
+- Season becomes the 21-day operating agreement.
 - Weekly becomes guided capacity planning.
 - Review leads with one lesson and one adjustment.
 - North Star becomes read-first.

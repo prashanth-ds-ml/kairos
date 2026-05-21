@@ -1,7 +1,7 @@
 # Kairos Psychological Product Blueprint
 
 Role: Product Leader / Product Designer / Behavioral Systems Designer  
-Review date: 2026-05-14  
+Review date: 2026-05-18  
 Inputs: Playwright audit of Today, North Star, Areas, Focus, Goals, Weekly, Review, Coach; existing product docs; behavioral design references.
 
 Related docs:
@@ -25,6 +25,12 @@ The app should not feel like a productivity dashboard that asks the user to mana
 
 The strongest version of Kairos is not a generic task manager. It is a behavioral operating system for time management, career compounding, and life balance.
 
+Current operating decision:
+
+- Kairos should use a 21-day Season as the active planning layer.
+- North Star holds long-term direction; Season decides what is protected now.
+- The app should not reintroduce a 90-day planning layer until the 21-day loop has real usage evidence.
+
 ## Local Brain Direction
 
 Kairos should become a local cognitive mirror, not a hidden black-box profile. The product should help the user remember what they said matters, notice repeated patterns, and make better commitments. It should not claim to be an identical copy of the person or diagnose them.
@@ -37,6 +43,7 @@ Implementation principles:
 - Every durable memory must be visible, editable, and deletable.
 - The best prompt is usually one question at the right moment, not a long form.
 - Psychological questionnaires should deepen self-understanding while avoiding clinical claims.
+- The full question bank should remain available as a library, but daily use should show only a small set of relevant questions.
 
 The initial Brain model should capture:
 
@@ -371,8 +378,8 @@ North Star should feel like direction, not setup admin.
 Future layout:
 
 - Identity statement.
-- Current season focus.
-- 90-day outcomes.
+- Current 21-day season focus.
+- Longer-term outcomes and priorities.
 - Top 3 priorities.
 - Edit button.
 - Review cadence.
@@ -453,7 +460,7 @@ Avoid:
 
 The app needs onboarding later. First-run should take under 10 minutes.
 
-1. Choose current season focus.
+1. Choose current 21-day season focus.
 2. Score six life areas.
 3. Create 1-3 active goals.
 4. Choose weekly capacity.

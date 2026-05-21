@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 
 from flask import Flask, Response, make_response, redirect, request, url_for
 
-from .storage import BrainProfile, DailyLog, FocusSession, Goal, JsonStore, LifeArea, NorthStar, QUESTION_BANK, SearchMemoryItem, Task, TodayBlock, TodayPlanItem, WeeklyPlan, WeeklyPlanItem, create_store, default_day_template, current_week_key, question_by_id, week_key_for
+from .storage import BrainMemory, BrainProfile, CurrentSeason, DailyLog, FocusSession, Goal, JsonStore, LifeArea, NorthStar, QUESTION_BANK, ResearchSession, ResearchSource, SearchMemoryItem, Task, TodayBlock, TodayPlanItem, WeeklyPlan, WeeklyPlanItem, create_store, default_day_template, current_week_key, question_by_id, week_key_for
 
 
 LOCAL_ENV_KEYS = {"HF_TOKEN", "HUGGINGFACE_API_TOKEN", "HUGGINGFACE_HUB_TOKEN", "HF_MODEL", "KAIROS_ACCESS_KEY", "KAIROS_MONGODB_URI", "KAIROS_MONGODB_DATABASE", "KAIROS_MONGODB_COLLECTION", "KAIROS_STORAGE", "KAIROS_VAULT_DIR", "KAIROS_SEARXNG_URL"}
@@ -91,6 +91,7 @@ def create_app() -> Flask:
         today_plan = store.load_today_plan()
         day_template = store.load_day_template()
         settings = store.load_settings()
+        season = store.load_current_season()
         planned_items = planned_work_items(goals, today_plan.items)
         focus_items = focus_candidates(goals)
         next_item = planned_items[0] if planned_items else (focus_items[0] if focus_items else None)
@@ -108,7 +109,7 @@ def create_app() -> Flask:
         }
         return page(
             "Today",
-            render_today(stats, today_log, today_plan, day_template, next_item, planned_items, focus_items, settings.pomodoro_minutes),
+            render_today(stats, today_log, today_plan, day_template, season, next_item, planned_items, focus_items, settings.pomodoro_minutes),
         )
 
     @app.get("/goals")
@@ -125,6 +126,20 @@ def create_app() -> Flask:
         store = get_store()
         return page("North Star", render_north_star(store.load_north_star(), store.load_life_areas(), store.load_goals()))
 
+    @app.get("/season")
+    def season_page() -> str:
+        store = get_store()
+        return page(
+            "Season",
+            render_season(
+                store.load_current_season(),
+                store.load_goals(),
+                store.load_sessions(),
+                store.load_brain_answers(),
+                store.load_brain_memories(),
+            ),
+        )
+
     @app.get("/brain")
     def brain_page() -> str:
         store = get_store()
@@ -133,8 +148,10 @@ def create_app() -> Flask:
             render_brain(
                 store.load_brain_profile(),
                 store.load_brain_answers(),
+                store.load_brain_memories(),
                 store.load_search_memory(),
                 store.load_north_star(),
+                store.load_current_season(),
                 store.load_life_areas(),
                 store.load_goals(),
             ),
@@ -167,7 +184,7 @@ def create_app() -> Flask:
         areas = store.load_life_areas()
         logs = store.load_daily_logs()
         weekly_plan = store.load_weekly_plan(current_week_key())
-        return page("Review", render_history(goals, areas, sessions, logs, weekly_plan))
+        return page("Review", render_history(goals, areas, sessions, logs, weekly_plan, store.load_current_season()))
 
     @app.get("/weekly")
     def weekly_page() -> str:
@@ -202,10 +219,14 @@ def create_app() -> Flask:
         query = ""
         results: list[dict[str, str]] = []
         error = ""
+        active_session = None
         if request.method == "POST":
             query = form_data().get("query", "").strip()
             results, error = searxng_search(query)
-        return page("Research", render_research(query, results, error, store.load_search_memory()))
+            if query and results:
+                sources = [ResearchSource(title=item.get("title", ""), url=item.get("url", ""), snippet=item.get("snippet", "")) for item in results[:6]]
+                active_session = store.add_research_session(query, synthesize_research_answer(query, sources), sources)
+        return page("Research", render_research(query, results, error, store.load_search_memory(), store.load_research_sessions(), active_session))
 
     @app.get("/research/read")
     def research_read_page() -> str:
@@ -229,7 +250,7 @@ def create_app() -> Flask:
             reader["query"] = query
             reader["title"] = reader.get("title") or fallback_title
             reader["snippet"] = reader.get("snippet") or fallback_snippet
-        return page("Research", render_research(query, [], error, store.load_search_memory(), reader))
+        return page("Research", render_research(query, [], error, store.load_search_memory(), store.load_research_sessions(), None, reader))
 
     @app.post("/goals")
     def create_goal() -> Response:
@@ -268,6 +289,84 @@ def create_app() -> Flask:
         )
         return redirect(url_for("north_star_page"))
 
+    @app.post("/season")
+    def save_season() -> Response:
+        form = form_data()
+        start_date = valid_date(form.get("start_date", ""), date.today())
+        end_date = valid_date(form.get("end_date", ""), start_date + timedelta(days=20))
+        if end_date < start_date:
+            end_date = start_date + timedelta(days=20)
+        get_store().save_current_season(
+            CurrentSeason(
+                title=form.get("title", "").strip(),
+                primary_track=form.get("primary_track", "").strip(),
+                support_track=form.get("support_track", "").strip(),
+                start_date=start_date.isoformat(),
+                end_date=end_date.isoformat(),
+                daily_minimum_minutes=nonnegative_form_int(form.get("daily_minimum_minutes")),
+                weekly_target_minutes=nonnegative_form_int(form.get("weekly_target_minutes")),
+                success_criteria=form.get("success_criteria", "").strip(),
+                constraints=form.get("constraints", "").strip(),
+                paused_goals=form.get("paused_goals", "").strip(),
+                review_question=form.get("review_question", "").strip(),
+                day_7_review=form.get("day_7_review", "").strip(),
+                day_14_review=form.get("day_14_review", "").strip(),
+                day_21_review=form.get("day_21_review", "").strip(),
+                final_decision=form.get("final_decision", "").strip(),
+                status=form.get("status", "active").strip() or "active",
+            )
+        )
+        return redirect(url_for("season_page"))
+
+    @app.post("/season/autofill")
+    def autofill_season() -> Response:
+        store = get_store()
+        current = store.load_current_season()
+        suggestion = build_season_suggestion(store.load_goals(), store.load_brain_answers(), store.load_brain_memories())
+        start_date = valid_date(current.start_date, date.today())
+        end_date = valid_date(current.end_date, start_date + timedelta(days=20))
+        store.save_current_season(
+            CurrentSeason(
+                title=current.title or suggestion["title"],
+                primary_track=current.primary_track or suggestion["primary_track"],
+                support_track=current.support_track or suggestion["support_track"],
+                start_date=start_date.isoformat(),
+                end_date=end_date.isoformat(),
+                daily_minimum_minutes=current.daily_minimum_minutes or int(suggestion["daily_minimum_minutes"]),
+                weekly_target_minutes=current.weekly_target_minutes or int(suggestion["weekly_target_minutes"]),
+                success_criteria=current.success_criteria or suggestion["success_criteria"],
+                constraints=current.constraints or suggestion["constraints"],
+                paused_goals=current.paused_goals or suggestion["paused_goals"],
+                review_question=current.review_question or suggestion["review_question"],
+                day_7_review=current.day_7_review,
+                day_14_review=current.day_14_review,
+                day_21_review=current.day_21_review,
+                final_decision=current.final_decision,
+                status=current.status,
+            )
+        )
+        return redirect(url_for("season_page"))
+
+    @app.post("/direction/apply")
+    def apply_direction_from_data() -> Response:
+        store = get_store()
+        goals = store.load_goals()
+        suggestion = build_season_suggestion(goals, store.load_brain_answers(), store.load_brain_memories())
+        north_star = store.load_north_star()
+        primary_title = str(suggestion["title"]).replace(" validation", "").strip()
+        support_titles = [item.strip() for item in str(suggestion["support_track"]).split(",") if item.strip()]
+        north_star.season_focus = north_star.season_focus or str(suggestion["title"])
+        if not north_star.ninety_day_outcomes.strip():
+            north_star.ninety_day_outcomes = (
+                f"Run a 21-day season for {primary_title}. "
+                f"Use focus evidence and checkpoints to decide whether to continue, adjust, or pause."
+            )
+        if not north_star.top_priorities:
+            north_star.top_priorities = [item for item in [primary_title, *support_titles[:2]] if item][:3]
+        store.save_north_star(north_star)
+        store.save_life_areas(apply_area_targets_from_goals(store.load_life_areas(), goals, primary_title, support_titles))
+        return redirect(url_for("season_page"))
+
     @app.post("/brain/profile")
     def save_brain_profile() -> Response:
         form = form_data()
@@ -294,6 +393,33 @@ def create_app() -> Flask:
             get_store().add_brain_answer(question_id, answer_text)
         return redirect(url_for("brain_page"))
 
+    @app.post("/brain/reflection")
+    def save_brain_reflection() -> Response:
+        form = form_data()
+        answer_text = form.get("answer", "").strip()
+        if answer_text:
+            get_store().add_brain_reflection(
+                prompt=form.get("prompt", "").strip(),
+                answer_text=answer_text,
+                construct=form.get("construct", "reflection").strip(),
+                section=form.get("section", "Triggered reflection").strip(),
+            )
+        target = form.get("next", "").strip()
+        return redirect(target or url_for("brain_page"))
+
+    @app.post("/brain/memory")
+    def save_brain_memory() -> Response:
+        form = form_data()
+        statement = form.get("statement", "").strip()
+        if statement:
+            get_store().add_brain_memory(
+                statement=statement,
+                memory_type=form.get("memory_type", "pattern").strip(),
+                source_type=form.get("source_type", "").strip(),
+                source_id=form.get("source_id", "").strip(),
+            )
+        return redirect(url_for("brain_page"))
+
     @app.post("/brain/sync")
     def sync_brain() -> Response:
         store = get_store()
@@ -304,15 +430,21 @@ def create_app() -> Flask:
     def save_research_memory() -> Response:
         form = form_data()
         query = form.get("query", "").strip()
+        session_id = form.get("session_id", "").strip()
+        note = form.get("note", "").strip()
+        linked_to = form.get("linked_to", "").strip()
         if query:
-            get_store().add_search_memory(
+            store = get_store()
+            store.add_search_memory(
                 query=query,
                 title=form.get("title", "").strip(),
                 url=form.get("url", "").strip(),
                 snippet=form.get("snippet", "").strip(),
-                note=form.get("note", "").strip(),
-                linked_to=form.get("linked_to", "").strip(),
+                note=note,
+                linked_to=linked_to,
             )
+            if session_id:
+                store.confirm_research_insight(session_id, note or form.get("snippet", "").strip(), linked_to)
         return redirect(url_for("research_page"))
 
     @app.post("/areas/<area_id>")
@@ -658,6 +790,13 @@ def valid_time(value: str, fallback: str) -> str:
     return value
 
 
+def valid_date(value: str, fallback: date) -> date:
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return fallback
+
+
 def time_to_minutes(value: str) -> int:
     hours, minutes = value.split(":")
     return int(hours) * 60 + int(minutes)
@@ -838,6 +977,13 @@ def bounded_form_int(value: str | None, low: int, high: int) -> int | None:
     return number
 
 
+def nonnegative_form_int(value: str | None) -> int:
+    try:
+        return max(0, int(value or "0"))
+    except ValueError:
+        return 0
+
+
 def week_start_for_key(week_key: str) -> date:
     normalized = week_key.replace("W", "")
     year_text, week_text = normalized.split("-", 1)
@@ -901,6 +1047,47 @@ def weekly_plan_item_map(plan: WeeklyPlan) -> dict[str, WeeklyPlanItem]:
     return {item.goal_id: item for item in plan.items}
 
 
+def season_dates(season: CurrentSeason) -> tuple[date, date]:
+    start = valid_date(season.start_date, date.today())
+    end = valid_date(season.end_date, start + timedelta(days=20))
+    if end < start:
+        end = start + timedelta(days=20)
+    return start, end
+
+
+def season_day_label(season: CurrentSeason) -> str:
+    start, end = season_dates(season)
+    today = date.today()
+    total_days = max(1, (end - start).days + 1)
+    if today < start:
+        return f"Starts in {(start - today).days} days"
+    if today > end:
+        return "Review due"
+    return f"Day {(today - start).days + 1} of {total_days}"
+
+
+def season_progress(season: CurrentSeason) -> int:
+    start, end = season_dates(season)
+    total_days = max(1, (end - start).days + 1)
+    elapsed = min(total_days, max(0, (date.today() - start).days + 1))
+    return min(100, round((elapsed / total_days) * 100))
+
+
+def season_current_day(season: CurrentSeason) -> int:
+    start, end = season_dates(season)
+    total_days = max(1, (end - start).days + 1)
+    return min(total_days, max(1, (date.today() - start).days + 1))
+
+
+def season_checkpoint_label(season: CurrentSeason) -> str:
+    day = season_current_day(season)
+    if day <= 7:
+        return "Day 7 check"
+    if day <= 14:
+        return "Day 14 check"
+    return "Day 21 decision"
+
+
 def page(title: str, content: str) -> str:
     return f"""<!doctype html>
 <html lang="en">
@@ -922,6 +1109,7 @@ def page(title: str, content: str) -> str:
     <nav>
       {nav_link("/", "Today", title)}
       {nav_link("/north-star", "North Star", title)}
+      {nav_link("/season", "Season", title)}
       {nav_link("/brain", "Brain", title)}
       {nav_link("/areas", "Areas", title)}
       {nav_link("/focus", "Focus", title)}
@@ -1047,6 +1235,7 @@ def render_today(
     today_log: DailyLog,
     today_plan: object,
     day_template: object,
+    season: CurrentSeason,
     next_item: dict[str, Goal | Task | None | str] | None,
     planned_items: list[dict[str, Goal | Task | None | str]],
     focus_items: list[dict[str, Goal | Task | None | str]],
@@ -1061,6 +1250,8 @@ def render_today(
     return f"""
 <header class="page-head"><div><p>{date.today().strftime('%A, %d %b %Y')}</p><h2>Today</h2></div><a class="button" href="/history">Review week</a></header>
 {now_panel(state, next_item)}
+{season_today_panel(season)}
+{triggered_question_panel(triggered_today_question(season, today_log, planned_items, int(stats["today_minutes"])), "/")}
 <section class="metrics today-strip">{cards}</section>
 {daily_loop_panel(today_log, planned_items, int(stats["today_minutes"]))}
 <div class="today-sections">
@@ -1079,6 +1270,78 @@ def render_today(
     </details>
   </div>
 </div>"""
+
+
+def season_today_panel(season: CurrentSeason) -> str:
+    if not season.title.strip() and not season.primary_track.strip():
+        return """
+<section class="panel">
+  <div class="panel-head"><div><h3>Set your 21-day season</h3><p>Choose one primary track before the day fills with scattered work.</p></div><a class="button primary" href="/season">Start setup</a></div>
+</section>"""
+    progress = season_progress(season)
+    return f"""
+<section class="panel season-strip">
+  <div class="panel-head">
+    <div>
+      <span class="pill">{escape(season_day_label(season))}</span>
+      <h3>{escape(season.title or "Current 21-day season")}</h3>
+      <p><strong>Primary:</strong> {escape(season.primary_track or "Not set")} | <strong>Support:</strong> {escape(season.support_track or "Not set")}</p>
+    </div>
+    <a class="button" href="/season">Edit season</a>
+  </div>
+  <div class="progress"><span style="width:{progress}%"></span></div>
+</section>"""
+
+
+def triggered_today_question(
+    season: CurrentSeason,
+    today_log: DailyLog,
+    planned_items: list[dict[str, Goal | Task | None | str]],
+    today_minutes: int,
+) -> dict[str, str] | None:
+    if not season.title.strip() and not season.primary_track.strip():
+        return {
+            "label": "Clarity",
+            "prompt": "What should be your primary 21-day track right now, and what must be paused?",
+            "construct": "season_clarity",
+        }
+    if not planned_items:
+        return {
+            "label": "Planning friction",
+            "prompt": "What is making it hard to choose one to three commitments for today?",
+            "construct": "planning_friction",
+        }
+    if today_minutes <= 0 and today_log.must_win.strip():
+        return {
+            "label": "Execution friction",
+            "prompt": "What is the first friction between your must-win and starting the first focus block?",
+            "construct": "execution_friction",
+        }
+    if today_minutes > 0 and not today_log.shutdown.strip():
+        return {
+            "label": "Learning",
+            "prompt": "What did today's focus evidence teach you about the 21-day season?",
+            "construct": "season_learning",
+        }
+    return None
+
+
+def triggered_question_panel(question: dict[str, str] | None, next_url: str) -> str:
+    if question is None:
+        return ""
+    return f"""
+<section class="panel reflection-panel">
+  <div class="panel-head"><div><span>{escape(question["label"])}</span><h3>Suggested reflection</h3></div></div>
+  <form method="post" action="/brain/reflection" class="stack">
+    <input type="hidden" name="prompt" value="{escape(question["prompt"])}">
+    <input type="hidden" name="construct" value="{escape(question["construct"])}">
+    <input type="hidden" name="section" value="Question engine">
+    <input type="hidden" name="next" value="{escape(next_url)}">
+    <p>{escape(question["prompt"])}</p>
+    <textarea name="answer" rows="2" placeholder="Answer only if it would help future you."></textarea>
+    <button>Save reflection</button>
+  </form>
+</section>"""
 
 
 def render_weekly(plan: WeeklyPlan, goals: list[Goal], sessions: list[FocusSession]) -> str:
@@ -1532,6 +1795,221 @@ def render_north_star(north_star: NorthStar, areas: list[LifeArea], goals: list[
 </section>"""
 
 
+def render_season(
+    season: CurrentSeason,
+    goals: list[Goal],
+    sessions: list[FocusSession],
+    answers: list[object],
+    memories: list[BrainMemory],
+) -> str:
+    start, end = season_dates(season)
+    season_sessions = [
+        session
+        for session in sessions
+        if session.session_type == "pomodoro"
+        and (session_day := session_date(session)) is not None
+        and start <= session_day <= end
+    ]
+    total_minutes = sum(session.duration_seconds for session in season_sessions) // 60
+    target = max(1, season.weekly_target_minutes * max(1, ((end - start).days + 1 + 6) // 7))
+    target_progress = min(100, round((total_minutes / target) * 100)) if season.weekly_target_minutes else 0
+    suggestion = build_season_suggestion(goals, answers, memories)
+    active_goal_titles = ", ".join(goal.title for goal in goals if goal.status == "active") or "No active goals yet"
+    checkpoint_cards = season_checkpoint_cards(season)
+    status_options = "".join(
+        f"<option value='{value}' {'selected' if season.status == value else ''}>{label}</option>"
+        for value, label in [("active", "Active"), ("closed", "Closed"), ("paused", "Paused")]
+    )
+    return f"""
+<header class="page-head"><div><p>21-day operating agreement</p><h2>Season</h2></div><a class="button" href="/north-star">North Star</a></header>
+<section class="metrics">
+  {metric("Season day", season_day_label(season), "primary")}
+  {metric("Tracked focus", f"{total_minutes} min", "strong")}
+  {metric("Daily minimum", f"{season.daily_minimum_minutes} min", "")}
+</section>
+<section class="panel season-decision">
+  <div class="panel-head">
+    <div>
+      <h3>{escape(season.title or str(suggestion["title"]))}</h3>
+      <p><strong>Primary:</strong> {escape(season.primary_track or str(suggestion["primary_track"]))}</p>
+      <p><strong>Support:</strong> {escape(season.support_track or str(suggestion["support_track"]))}</p>
+    </div>
+    <div class="actions">
+      <form method="post" action="/season/autofill"><button class="primary">Apply empty fields</button></form>
+      <form method="post" action="/direction/apply"><button>Update Direction</button></form>
+    </div>
+  </div>
+</section>
+<section class="north-grid">
+  <form method="post" action="/season" class="panel north-form">
+    <h3>Edit season</h3>
+    <label>Season title<input name="title" value="{escape(season.title)}" placeholder="ESE validation while building Kairos"></label>
+    <label>Primary track<textarea name="primary_track" rows="3" placeholder="The one track that gets protected first">{escape(season.primary_track)}</textarea></label>
+    <label>Support track<textarea name="support_track" rows="3" placeholder="Important work that supports the season without taking over">{escape(season.support_track)}</textarea></label>
+    <div class="priority-grid">
+      <label>Start date<input type="date" name="start_date" value="{escape(start.isoformat())}"></label>
+      <label>End date<input type="date" name="end_date" value="{escape(end.isoformat())}"></label>
+      <label>Status<select name="status">{status_options}</select></label>
+    </div>
+    <div class="priority-grid">
+      <label>Daily minimum minutes<input type="number" min="0" step="5" name="daily_minimum_minutes" value="{season.daily_minimum_minutes}"></label>
+      <label>Weekly target minutes<input type="number" min="0" step="15" name="weekly_target_minutes" value="{season.weekly_target_minutes}"></label>
+      <label>Progress target<div class="progress"><span style="width:{target_progress}%"></span></div></label>
+    </div>
+    <label>Success criteria<textarea name="success_criteria" rows="3" placeholder="What evidence proves this season is real?">{escape(season.success_criteria)}</textarea></label>
+    <label>Constraints<textarea name="constraints" rows="3" placeholder="Rules like office hours for AI/Kairos, home hours for ESE, one certification max">{escape(season.constraints)}</textarea></label>
+    <label>Paused goals<textarea name="paused_goals" rows="3" placeholder="What is explicitly not allowed to compete this season?">{escape(season.paused_goals)}</textarea></label>
+    <label>Day-21 review question<textarea name="review_question" rows="2" placeholder="Continue, adjust, or pause the primary track?">{escape(season.review_question)}</textarea></label>
+    <details class="edit-details">
+      <summary>Checkpoint notes</summary>
+      <label>Day 7 review<textarea name="day_7_review" rows="3" placeholder="Is the plan realistic? What has evidence shown?">{escape(season.day_7_review)}</textarea></label>
+      <label>Day 14 review<textarea name="day_14_review" rows="3" placeholder="What needs to change for the final week?">{escape(season.day_14_review)}</textarea></label>
+      <label>Day 21 review<textarea name="day_21_review" rows="3" placeholder="What did the season prove?">{escape(season.day_21_review)}</textarea></label>
+      <label>Final decision<textarea name="final_decision" rows="2" placeholder="Continue, adjust, or pause?">{escape(season.final_decision)}</textarea></label>
+    </details>
+    <button class="primary">Save season</button>
+  </form>
+  <section class="panel">
+    <h3>Season clarity</h3>
+    <p class="muted">A season is a 21-day test. It should turn hope into evidence without forcing a permanent life decision.</p>
+    <div class="list">
+      <article class="item"><h4>Active goals</h4><p>{escape(active_goal_titles)}</p></article>
+      <article class="item"><h4>Suggested default</h4><p>Primary: ESE home-hours validation. Support: Kairos and AI career growth during office/available work hours.</p></article>
+      <article class="item"><h4>Decision rule</h4><p>At the end, decide from tracked evidence: continue, adjust, or pause.</p></article>
+    </div>
+    <h3>Checkpoint rhythm</h3>
+    <div class="list">{checkpoint_cards}</div>
+  </section>
+</section>"""
+
+
+def season_suggestion_panel(suggestion: dict[str, str | int]) -> str:
+    return f"""
+<section class="item">
+  <div class="area-meta"><span>Suggested from Goals + Brain</span><span>Confirm before use</span></div>
+  <h4>{escape(str(suggestion["title"]))}</h4>
+  <p><strong>Primary:</strong> {escape(str(suggestion["primary_track"]))}</p>
+  <p><strong>Support:</strong> {escape(str(suggestion["support_track"]))}</p>
+  <p><strong>Constraint:</strong> {escape(str(suggestion["constraints"]))}</p>
+  <form method="post" action="/season/autofill">
+    <button>Apply empty fields</button>
+  </form>
+  <form method="post" action="/direction/apply">
+    <button>Update North Star + Areas</button>
+  </form>
+</section>"""
+
+
+def build_season_suggestion(
+    goals: list[Goal],
+    answers: list[object],
+    memories: list[BrainMemory],
+) -> dict[str, str | int]:
+    active = sorted_goals([goal for goal in goals if goal.status == "active"])
+    primary = choose_primary_goal(active)
+    support = choose_support_goals(active, primary)
+    paused = [goal for goal in active if goal != primary and goal not in support and goal.priority in {"P3", "P4", "P5"}]
+    primary_text = goal_track_text(primary, "Choose one primary track")
+    support_text = ", ".join(goal.title for goal in support[:2]) or "Keep job/career maintenance visible without letting it take over"
+    friction = recent_friction_text(answers, memories)
+    daily_minimum = 90 if primary and "ese" in primary.title.lower() else 45
+    weekly_target = daily_minimum * 5
+    title = f"{primary.title} validation" if primary else "21-day clarity season"
+    return {
+        "title": title,
+        "primary_track": primary_text,
+        "support_track": support_text,
+        "daily_minimum_minutes": daily_minimum,
+        "weekly_target_minutes": weekly_target,
+        "success_criteria": f"{15 if daily_minimum >= 90 else 10}+ focused sessions and one honest review of progress evidence.",
+        "constraints": friction or "One primary track, one support track, and one active certification at most.",
+        "paused_goals": ", ".join(goal.title for goal in paused[:5]) or "Any goal that does not support the current season.",
+        "review_question": "Based on 21 days of evidence, should this track continue, adjust, or pause?",
+    }
+
+
+def choose_primary_goal(goals: list[Goal]) -> Goal | None:
+    if not goals:
+        return None
+    dated = [goal for goal in goals if parse_target_date(goal.target_date) is not None]
+    if dated:
+        return sorted(dated, key=lambda goal: (parse_target_date(goal.target_date) or date.max, PRIORITY_ORDER.get(goal.priority, 9)))[0]
+    return goals[0]
+
+
+def choose_support_goals(goals: list[Goal], primary: Goal | None) -> list[Goal]:
+    return [
+        goal
+        for goal in goals
+        if goal != primary and goal.category in {"career", "learning", "systems"}
+    ][:3]
+
+
+def goal_track_text(goal: Goal | None, fallback: str) -> str:
+    if goal is None:
+        return fallback
+    next_task = next((task for task in sorted_tasks(goal.tasks) if task.status in {"in_progress", "todo", "blocked"}), None)
+    task_text = f" Next action: {next_task.title}." if next_task else " Add one concrete next task."
+    return f"{goal.title}.{task_text}"
+
+
+def recent_friction_text(answers: list[object], memories: list[BrainMemory]) -> str:
+    memory = next((item for item in sorted(memories, key=lambda entry: entry.created_at, reverse=True) if item.memory_type in {"pattern", "rule"}), None)
+    if memory is not None:
+        return memory.statement
+    answer = next(
+        (
+            item
+            for item in sorted(answers, key=lambda entry: getattr(entry, "created_at", ""), reverse=True)
+            if getattr(item, "construct", "") in {"planning_friction", "execution_friction", "season_clarity", "season_learning"}
+        ),
+        None,
+    )
+    if answer is None:
+        return ""
+    return str(getattr(answer, "answer", "")).strip()
+
+
+def apply_area_targets_from_goals(
+    areas: list[LifeArea],
+    goals: list[Goal],
+    primary_title: str,
+    support_titles: list[str],
+) -> list[LifeArea]:
+    active = [goal for goal in goals if goal.status == "active"]
+    primary_goal = next((goal for goal in active if goal.title == primary_title), None)
+    support_set = set(support_titles)
+    for area in areas:
+        area_goals = [goal for goal in active if goal.category == area.id]
+        if not area_goals:
+            continue
+        if primary_goal and primary_goal.category == area.id:
+            area.weekly_target_minutes = max(area.weekly_target_minutes, 450)
+            area.notes = area.notes or f"Primary 21-day season area: {primary_goal.title}."
+        elif any(goal.title in support_set for goal in area_goals):
+            area.weekly_target_minutes = max(area.weekly_target_minutes, 150)
+            area.notes = area.notes or "Support track area for the current season."
+        else:
+            area.weekly_target_minutes = max(area.weekly_target_minutes, 25)
+    return areas
+
+
+def season_checkpoint_cards(season: CurrentSeason) -> str:
+    current = season_checkpoint_label(season)
+    checkpoints = [
+        ("Day 7 check", "Reality", "Is the daily minimum realistic?", season.day_7_review),
+        ("Day 14 check", "Adjustment", "What must change for the final week?", season.day_14_review),
+        ("Day 21 decision", "Decision", "Continue, adjust, or pause?", season.day_21_review or season.final_decision),
+    ]
+    rows = []
+    for label, title, prompt, answer in checkpoints:
+        status = "Current" if label == current else ("Done" if answer.strip() else "Open")
+        rows.append(
+            f"<article class='item'><div class='area-meta'><span>{escape(status)}</span><span>{escape(label)}</span></div><h4>{escape(title)}</h4><p>{escape(answer.strip() or prompt)}</p></article>"
+        )
+    return "".join(rows)
+
+
 def north_star_area_row(area: LifeArea, goals: list[Goal]) -> str:
     goal_count = len([goal for goal in goals if goal.category == area.id])
     return f"""
@@ -1547,8 +2025,10 @@ def north_star_area_row(area: LifeArea, goals: list[Goal]) -> str:
 def render_brain(
     profile: BrainProfile,
     answers: list[object],
+    memories: list[BrainMemory],
     searches: list[SearchMemoryItem],
     north_star: NorthStar,
+    season: CurrentSeason,
     areas: list[LifeArea],
     goals: list[Goal],
 ) -> str:
@@ -1562,7 +2042,10 @@ def render_brain(
     ]
     progress = sum(1 for _, done in progress_items if done)
     cards = "".join(metric(label, "Done" if done else "Open", "good" if done else "") for label, done in progress_items)
-    question_cards = "".join(brain_question_card(question) for question in QUESTION_BANK)
+    question_cards = grouped_question_cards(QUESTION_BANK)
+    type_counts = count_values(question["response_type"] for question in QUESTION_BANK)
+    question_summary = ", ".join(f"{key}: {value}" for key, value in sorted(type_counts.items()))
+    recommended_cards = "".join(brain_question_card(question) for question in recommended_questions(QUESTION_BANK, season, goals, answers))
     recent_answers = "".join(
         f"<article class='item'><h4>{escape(getattr(answer, 'section', 'Reflection'))}</h4><p>{escape(getattr(answer, 'prompt', ''))}</p><p class='session-note'>{escape(getattr(answer, 'answer', ''))}</p></article>"
         for answer in sorted(answers, key=lambda item: getattr(item, "created_at", ""), reverse=True)[:8]
@@ -1571,6 +2054,11 @@ def render_brain(
         f"<article class='item'><h4>{escape(item.query)}</h4><p>{escape(item.title or item.url or item.note or 'Saved search')}</p></article>"
         for item in sorted(searches, key=lambda entry: entry.created_at, reverse=True)[:5]
     ) or "<p class='muted'>Saved research will appear here.</p>"
+    memory_rows = "".join(
+        f"<article class='item'><div class='area-meta'><span>{escape(memory.memory_type)}</span></div><h4>{escape(memory.statement)}</h4><small>{escape(memory.created_at[:16].replace('T', ' '))}</small></article>"
+        for memory in sorted(memories, key=lambda item: item.created_at, reverse=True)[:8]
+    ) or "<p class='muted'>Confirmed memories will appear here after you save candidates.</p>"
+    candidate_rows = brain_memory_candidates(answers, searches, memories)
     return f"""
 <header class="page-head"><div><p>Local cognitive mirror</p><h2>Brain</h2></div><a class="button primary" href="/research">Open research</a></header>
 <section class="coach-hero panel">
@@ -1584,6 +2072,10 @@ def render_brain(
   </form>
 </section>
 <section class="coach-context"><div class="coach-context-grid">{cards}</div></section>
+<section class="panel">
+  <div class="panel-head"><div><h3>Recommended now</h3><p>Answer only what helps today's direction, season, or next block.</p></div></div>
+  <div class="question-grid">{recommended_cards}</div>
+</section>
 <div class="grid two coach-grid">
   <form method="post" action="/brain/profile" class="panel stack">
     <div class="panel-head"><div><h3>Brain profile</h3><p>{progress}/6 core fields defined. Keep it honest and editable.</p></div></div>
@@ -1600,14 +2092,118 @@ def render_brain(
   <section class="panel">
     <div class="panel-head"><div><h3>Recent memory</h3><p>Raw answers and saved research that Coach can use.</p></div></div>
     <div class="list">{recent_answers}</div>
+    <h3>Confirmed memories</h3>
+    <div class="list">{memory_rows}</div>
+    <h3>Memory candidates</h3>
+    <div class="list">{candidate_rows}</div>
     <h3>Saved research</h3>
     <div class="list">{search_rows}</div>
   </section>
 </div>
 <section class="panel">
-  <div class="panel-head"><div><h3>Question engine</h3><p>Answer one useful question at a time. Likert, ranking, frequency, and open prompts are supported.</p></div></div>
-  <div class="question-grid">{question_cards}</div>
+  <div class="panel-head"><div><h3>Question engine</h3><p>{len(QUESTION_BANK)} questions. {escape(question_summary)}.</p></div></div>
+  <h3>Full library</h3>
+  <div class="list">{question_cards}</div>
 </section>"""
+
+
+def recommended_questions(
+    questions: list[dict[str, object]],
+    season: CurrentSeason,
+    goals: list[Goal],
+    answers: list[object],
+) -> list[dict[str, object]]:
+    answered_ids = {getattr(answer, "question_id", "") for answer in answers}
+    triggers: set[str] = {"today_setup", "weekly_planning"}
+    if not season.title.strip() and not season.primary_track.strip():
+        triggers.add("season_setup")
+    if any(goal.status == "active" and not goal.tasks for goal in goals):
+        triggers.add("new_goal")
+    if season_current_day(season) >= 7:
+        triggers.add("day_7_review")
+    if season_current_day(season) >= 14:
+        triggers.add("day_14_review")
+    if season_current_day(season) >= 21:
+        triggers.add("day_21_review")
+    candidates = [
+        question
+        for question in questions
+        if question.get("priority") == "high"
+        and question.get("trigger") in triggers
+        and question.get("id") not in answered_ids
+    ]
+    return candidates[:6] or [
+        question
+        for question in questions
+        if question.get("priority") in {"high", "medium"} and question.get("id") not in answered_ids
+    ][:6]
+
+
+def brain_memory_candidates(
+    answers: list[object],
+    searches: list[SearchMemoryItem],
+    memories: list[BrainMemory],
+) -> str:
+    existing_sources = {(memory.source_type, memory.source_id) for memory in memories if memory.source_id}
+    cards: list[str] = []
+    for answer in sorted(answers, key=lambda item: getattr(item, "created_at", ""), reverse=True)[:6]:
+        answer_id = getattr(answer, "id", "")
+        if ("answer", answer_id) in existing_sources:
+            continue
+        statement = candidate_from_answer(answer)
+        cards.append(memory_candidate_card(statement, "pattern", "answer", answer_id))
+    for item in sorted(searches, key=lambda entry: entry.created_at, reverse=True)[:4]:
+        if ("research", item.id) in existing_sources:
+            continue
+        statement = item.note.strip() or item.snippet.strip() or item.title.strip()
+        if statement:
+            cards.append(memory_candidate_card(statement, "research", "research", item.id))
+    return "".join(cards[:6]) or "<p class='muted'>No new candidates. Answer a reflection or save a research insight.</p>"
+
+
+def candidate_from_answer(answer: object) -> str:
+    construct = getattr(answer, "construct", "reflection")
+    text = getattr(answer, "answer", "").strip()
+    prompt = getattr(answer, "prompt", "").strip()
+    if construct in {"planning_friction", "execution_friction"}:
+        return f"Friction pattern: {text}"
+    if construct in {"season_clarity", "season_learning"}:
+        return f"Season insight: {text}"
+    if prompt:
+        return f"{prompt} Answer: {text}"
+    return text
+
+
+def memory_candidate_card(statement: str, memory_type: str, source_type: str, source_id: str) -> str:
+    return f"""
+<article class="item">
+  <form method="post" action="/brain/memory" class="stack compact">
+    <input type="hidden" name="source_type" value="{escape(source_type)}">
+    <input type="hidden" name="source_id" value="{escape(source_id)}">
+    <label>Candidate memory<textarea name="statement" rows="2">{escape(statement)}</textarea></label>
+    <label>Type<input name="memory_type" value="{escape(memory_type)}"></label>
+    <button>Confirm memory</button>
+  </form>
+</article>"""
+
+
+def grouped_question_cards(questions: list[dict[str, object]]) -> str:
+    sections: dict[str, list[dict[str, object]]] = {}
+    for question in questions:
+        sections.setdefault(str(question["section"]), []).append(question)
+    groups = []
+    for section, items in sections.items():
+        cards = "".join(brain_question_card(question) for question in items)
+        open_attr = ""
+        section_label = f"{section} (optional)" if section.startswith("IPIP ") else section
+        groups.append(
+            f"""
+<details class="panel secondary-panel"{open_attr}>
+  <summary><span>{len(items)} questions</span><strong>{escape(section_label)}</strong></summary>
+  <div class="question-grid">{cards}</div>
+</details>"""
+        )
+    return "".join(groups)
 
 
 def brain_question_card(question: dict[str, object]) -> str:
@@ -1772,6 +2368,7 @@ def render_history(
     sessions: list[FocusSession],
     logs: list[DailyLog],
     weekly_plan: WeeklyPlan,
+    season: CurrentSeason,
 ) -> str:
     week_sessions = sessions_for_current_week(sessions)
     week_key = current_week_key()
@@ -1828,6 +2425,7 @@ def render_history(
         ]
     )
     charts = review_charts(goals, areas, week_sessions, sessions)
+    season_panel = review_season_panel(season, sessions)
     return f"""
 <header class='page-head'><div><p>Weekly learning</p><h2>Review</h2></div><div class="row"><a class='button' href='/weekly'>Plan week</a><a class='button primary' href='/focus'>Start focus</a></div></header>
 <section class='review-hero panel'>
@@ -1838,6 +2436,7 @@ def render_history(
   </div>
   <a class='button primary' href='{escape(insight_action[1])}'>{escape(insight_action[0])}</a>
 </section>
+{season_panel}
 {decisions}
 <section class='metrics review-metrics'>{cards}</section>
 <section class='metrics review-metrics'>{planning_cards}</section>
@@ -1873,6 +2472,39 @@ def render_history(
 <section class='panel review-list'>
   <div class='panel-head'><div><h3>Recent sessions</h3><p>Evidence of work, including partial and blocked blocks.</p></div></div>
   <div class='list'>{body}</div>
+</section>"""
+
+
+def review_season_panel(season: CurrentSeason, sessions: list[FocusSession]) -> str:
+    if not season.title.strip() and not season.primary_track.strip():
+        return ""
+    start, end = season_dates(season)
+    season_sessions = [
+        session
+        for session in sessions
+        if session.session_type == "pomodoro"
+        and (session_day := session_date(session)) is not None
+        and start <= session_day <= end
+    ]
+    minutes = sum(session.duration_seconds for session in season_sessions) // 60
+    target = season.weekly_target_minutes * max(1, ((end - start).days + 1 + 6) // 7)
+    target_text = f"{format_minutes(minutes)} / {format_minutes(target)}" if target else format_minutes(minutes)
+    return f"""
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <span class="pill">{escape(season_day_label(season))}</span>
+      <h3>{escape(season.title or "21-day season")}</h3>
+      <p><strong>Primary:</strong> {escape(season.primary_track or "Not set")}</p>
+    </div>
+    <a class="button" href="/season">Review season</a>
+  </div>
+  <div class="metrics">
+    {metric("Season focus", target_text, "primary")}
+    {metric("Daily minimum", f"{season.daily_minimum_minutes} min", "")}
+    {metric("Checkpoint", season_checkpoint_label(season), "")}
+    {metric("Decision", season.final_decision or season.review_question or "Continue, adjust, or pause?", "strong")}
+  </div>
 </section>"""
 
 
@@ -2307,6 +2939,8 @@ def render_research(
     results: list[dict[str, str]],
     error: str,
     saved: list[SearchMemoryItem],
+    sessions: list[ResearchSession],
+    active_session: ResearchSession | None = None,
     reader: dict[str, str] | None = None,
 ) -> str:
     result_rows = "".join(research_result_card(query, item) for item in results[:8])
@@ -2314,22 +2948,28 @@ def render_research(
         message = error or "Search locally, open a result to read it here, then save only what matters."
         result_rows = f"<p class='muted'>{escape(message)}</p>"
     reader_panel = render_reader_panel(reader) if reader else ""
+    answer_panel = render_research_answer(active_session) if active_session else ""
     saved_rows = "".join(
         f"<article class='item'><h4>{escape(item.query)}</h4><p>{escape(item.title or item.url or item.note or 'Saved research')}</p><p class='session-note'>{escape(item.note)}</p></article>"
         for item in sorted(saved, key=lambda entry: entry.created_at, reverse=True)[:12]
     ) or "<p class='muted'>No saved research yet.</p>"
+    session_rows = "".join(
+        research_session_row(item)
+        for item in sorted(sessions, key=lambda entry: entry.created_at, reverse=True)[:8]
+    ) or "<p class='muted'>No research sessions yet.</p>"
     count_label = f"{len(results[:8])} results" if results else "Search memory"
     session_steps = research_session_steps(bool(query), bool(reader), len(saved))
     return f"""
 <header class="page-head"><div><p>Search memory</p><h2>Research</h2></div><a class="button primary" href="/brain">Open brain</a></header>
 {session_steps}
+{answer_panel}
 {reader_panel}
 <div class="research-layout">
   <section class="panel research-main">
-    <div class="panel-head"><div><h3>SearXNG search</h3><p>Search, open a result into the reader, then save only what should become memory.</p></div><span class="pill">{escape(count_label)}</span></div>
+    <div class="panel-head"><div><h3>Research question</h3><p>Ask a question, get source-backed synthesis, then save the insight that should affect your plan.</p></div><span class="pill">{escape(count_label)}</span></div>
     <form method="post" action="/research" class="research-search">
-      <input name="query" value="{escape(query)}" placeholder="Search with local SearXNG">
-      <button class="primary">Search</button>
+      <input name="query" value="{escape(query)}" placeholder="Ask a research question">
+      <button class="primary">Research</button>
     </form>
     <div class="research-results">{result_rows}</div>
   </section>
@@ -2350,8 +2990,53 @@ def render_research(
       <div class="panel-head"><div><h3>Saved memory</h3><p>Pages you chose to keep.</p></div></div>
     <div class="list">{saved_rows}</div>
     </section>
+    <section class="panel saved-memory">
+      <div class="panel-head"><div><h3>Research sessions</h3><p>Question, answer, and sources kept together.</p></div></div>
+      <div class="list">{session_rows}</div>
+    </section>
   </section>
 </div>"""
+
+
+def render_research_answer(session: ResearchSession | None) -> str:
+    if session is None:
+        return ""
+    source_rows = "".join(
+        f"<li><a href='{escape(source.url)}' target='_blank' rel='noreferrer'>{escape(source.title or source.url)}</a></li>"
+        for source in session.sources[:6]
+    )
+    return f"""
+<section class="panel reader-panel">
+  <div class="panel-head">
+    <div><span class="pill">{len(session.sources)} sources</span><h3>{escape(session.question)}</h3></div>
+    <form method="post" action="/research/save">
+      <input type="hidden" name="session_id" value="{escape(session.id)}">
+      <input type="hidden" name="query" value="{escape(session.question)}">
+      <input type="hidden" name="title" value="Research answer">
+      <input type="hidden" name="snippet" value="{escape(session.answer)}">
+      <input name="linked_to" placeholder="Link to season, goal, or area">
+      <textarea name="note" rows="2" placeholder="Confirmed insight to remember"></textarea>
+      <button>Save to Brain memory</button>
+    </form>
+  </div>
+  <div class="reader-grid">
+    <div class="coach-answer">{readable_paragraphs(session.answer)}</div>
+    <div class="reader-save"><h4>Sources</h4><ol>{source_rows}</ol></div>
+  </div>
+</section>"""
+
+
+def research_session_row(session: ResearchSession) -> str:
+    status = "Saved insight" if session.saved_insight.strip() else "Unsaved"
+    note = session.saved_insight.strip() or session.answer[:220]
+    linked = f" | {session.linked_to}" if session.linked_to.strip() else ""
+    return f"""
+<article class='item'>
+  <div class="area-meta"><span>{escape(status)}</span><span>{len(session.sources)} sources</span></div>
+  <h4>{escape(session.question)}</h4>
+  <p>{escape(note)}</p>
+  <small>{escape(session.created_at[:16].replace('T', ' '))}{escape(linked)}</small>
+</article>"""
 
 
 def research_session_steps(has_query: bool, has_reader: bool, saved_count: int) -> str:
@@ -2444,6 +3129,29 @@ def research_result_card(query: str, item: dict[str, str]) -> str:
     </form>
   </details>
 </article>"""
+
+
+def synthesize_research_answer(question: str, sources: list[ResearchSource]) -> str:
+    if not sources:
+        return "No useful sources were found. Try a narrower question or configure SearXNG."
+    lines = [
+        f"Research question: {question}",
+        "",
+        "Working answer:",
+    ]
+    for index, source in enumerate(sources[:5], start=1):
+        snippet = source.snippet.strip() or "No snippet was available from this source."
+        title = source.title.strip() or source.url.strip() or f"Source {index}"
+        lines.append(f"{index}. {snippet} [{index}]")
+        lines.append(f"   Source: {title}")
+    lines.extend(
+        [
+            "",
+            "How to use this:",
+            "Treat this as a source-backed first pass, then open the strongest sources and save only the insight that changes a goal, season, or decision.",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def searxng_search(query: str) -> tuple[list[dict[str, str]], str]:

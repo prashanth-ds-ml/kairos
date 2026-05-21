@@ -1,8 +1,24 @@
 # Kairos Cognitive Mirror and Best-Self Coach Build Spec
 
 Role: Product Leader / Product Designer / Systems Builder  
-Review date: 2026-05-16  
+Review date: 2026-05-18  
 Status: living build document
+
+Current implementation snapshot:
+
+- Season is the active 21-day operating agreement.
+- Brain stores editable profile fields, confirmed memories, memory candidates, saved research, and a 121-question bank.
+- Research stores source-backed sessions and selected durable insights.
+- Today, Season, Brain, Research, Weekly, Review, Goals, Areas, Focus, North Star, Coach, and mobile Today are covered by Playwright smoke screenshots.
+- The next development surface is CLI-first, using the same storage layer as the web app.
+- MongoDB is the expected cross-machine persistence path; local JSON remains a fallback.
+
+CLI-first snapshot:
+
+- First surface: `kairos` / `kairos home`, the command center for season, daily discipline progress, XP-style completed minutes, done work, and next action.
+- Status command: `kairos status`, to verify storage mode and see completed work grouped by priority, goal, task, and minutes.
+- Core loop: `kairos daily`, `kairos goal create`, `kairos goal add-task`, `kairos today plan`, `kairos focus`, and `kairos status`.
+- Timer requirement: terminal countdown, alert at focus end, saved session result, and task status update for completed, partial, or blocked work.
 
 This document defines the evolved Kairos product after the idea shifted from a time-management app into a cognitive mirror plus best-self coach plus execution system.
 
@@ -498,8 +514,20 @@ Purpose:
 - define identity,
 - values,
 - anti-vision,
-- 90-day outcomes,
-- and seasonal direction.
+- longer-term outcomes,
+- and durable priorities.
+
+### Season
+
+Primary question: What is protected for the next 21 days?
+
+Purpose:
+
+- choose one primary track,
+- name one support track,
+- define success evidence,
+- capture constraints and paused goals,
+- and review Day 7, Day 14, and Day 21 checkpoints.
 
 ### Areas
 
@@ -530,7 +558,9 @@ Primary question: What have I learned about myself?
 Purpose:
 
 - store questionnaire answers,
+- recommend a small set of questions before exposing the full library,
 - synthesize profile fields,
+- separate confirmed memories from candidates,
 - show recent memory,
 - and support the mirror layer.
 

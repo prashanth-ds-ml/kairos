@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import json
 import os
 from pathlib import Path
@@ -29,7 +29,7 @@ DEFAULT_LIFE_AREAS = [
 
 LIKERT_OPTIONS = ["Strongly disagree", "Disagree", "Neutral", "Agree", "Strongly agree"]
 FREQUENCY_OPTIONS = ["Never", "Rarely", "Sometimes", "Often", "Always"]
-QUESTION_BANK = [
+KAIROS_QUESTIONS = [
     {
         "id": "identity_becoming",
         "section": "North Star",
@@ -120,6 +120,170 @@ QUESTION_BANK = [
         "options": [],
         "source": "Kairos behavioral review",
     },
+]
+
+KAIROS_NATIVE_QUESTION_SPECS = [
+    ("life_pressure_01", "Life Pressures", "pressure", "Which pressure is loudest right now: money, family, status, regret, health, comparison, or uncertainty?", "choice", ["Money", "Family", "Status", "Regret", "Health", "Comparison", "Uncertainty"], "season_setup", "constraints", "high"),
+    ("life_pressure_02", "Life Pressures", "pressure", "What pressure are you treating as urgent even though it may not be important?", "open", [], "season_setup", "constraints", "medium"),
+    ("life_pressure_03", "Life Pressures", "pressure", "What problem would become worse if ignored for 21 days?", "open", [], "season_setup", "primary_track", "high"),
+    ("life_pressure_04", "Life Pressures", "pressure", "Who or what is influencing your goals most right now?", "choice", ["My own ambition", "Parents/family", "Money pressure", "Peer comparison", "Fear of regret", "Unclear"], "season_setup", "motivation_notes", "medium"),
+    ("season_primary_01", "Season Design", "season_clarity", "What should be the primary track for the next 21 days?", "open", [], "season_setup", "season_focus", "high"),
+    ("season_primary_02", "Season Design", "season_clarity", "What evidence would prove this 21-day season was real?", "open", [], "season_setup", "success_criteria", "high"),
+    ("season_primary_03", "Season Design", "season_clarity", "What is the daily minimum that would still count as keeping the season alive?", "choice", ["25 minutes", "45 minutes", "60 minutes", "90 minutes", "120 minutes"], "season_setup", "daily_minimum", "high"),
+    ("season_primary_04", "Season Design", "season_clarity", "Which goal must be support-only during this season?", "open", [], "season_setup", "paused_goals", "high"),
+    ("season_primary_05", "Season Design", "season_clarity", "What would make you pause this season at Day 21?", "open", [], "day_21_review", "review_question", "medium"),
+    ("goal_conflict_01", "Goal Realism", "goal_conflict", "Which active goal is most likely to steal time from your primary season?", "choice", ["Career growth", "Exam prep", "Certifications", "Family obligations", "Health", "No clear conflict"], "season_setup", "constraints", "high"),
+    ("goal_conflict_02", "Goal Realism", "goal_conflict", "What goal are you keeping active mostly because it feels painful to pause?", "open", [], "season_setup", "paused_goals", "high"),
+    ("goal_conflict_03", "Goal Realism", "goal_conflict", "When you add a new goal, do you usually remove an old commitment?", "frequency", FREQUENCY_OPTIONS, "new_goal", "planning_pattern", "medium"),
+    ("goal_conflict_04", "Goal Realism", "goal_conflict", "What would you stop doing this week if you were being honest about capacity?", "open", [], "weekly_review", "constraints", "high"),
+    ("goal_conflict_05", "Goal Realism", "goal_conflict", "How many active goals can you realistically move this week?", "choice", ["1", "2", "3", "4+", "I do not know"], "weekly_planning", "capacity", "high"),
+    ("career_01", "Career Strategy", "career_strategy", "What proof of work would increase your career options fastest in the next 21 days?", "open", [], "season_setup", "support_track", "high"),
+    ("career_02", "Career Strategy", "career_strategy", "Which skill is closest to improving your current AI engineer work?", "open", [], "weekly_planning", "support_track", "high"),
+    ("career_03", "Career Strategy", "career_strategy", "Are you learning this skill for a project, a certification, a job switch, or confidence?", "choice", ["Project", "Certification", "Job switch", "Confidence", "Unclear"], "new_goal", "motivation_notes", "medium"),
+    ("career_04", "Career Strategy", "career_strategy", "What visible artifact can you ship instead of only studying?", "open", [], "weekly_planning", "success_criteria", "high"),
+    ("career_05", "Career Strategy", "career_strategy", "What career move are you avoiding because it would expose your current skill level?", "open", [], "weekly_review", "struggles", "medium"),
+    ("exam_01", "Exam Validation", "exam_validation", "What exact exam work proves the attempt is alive this week?", "open", [], "season_setup", "success_criteria", "high"),
+    ("exam_02", "Exam Validation", "exam_validation", "What subject or topic are you avoiding first?", "open", [], "weekly_planning", "struggles", "high"),
+    ("exam_03", "Exam Validation", "exam_validation", "How many honest study sessions would make this week successful?", "choice", ["3", "5", "7", "10", "12+"], "weekly_planning", "success_criteria", "high"),
+    ("exam_04", "Exam Validation", "exam_validation", "What score, mock, or revision evidence will you review before deciding to continue?", "open", [], "day_21_review", "review_question", "high"),
+    ("cert_01", "Certification Filter", "certification_filter", "Which certification directly supports your current work or next project?", "open", [], "new_goal", "support_track", "medium"),
+    ("cert_02", "Certification Filter", "certification_filter", "What will this certification replace in your weekly capacity?", "open", [], "new_goal", "constraints", "high"),
+    ("cert_03", "Certification Filter", "certification_filter", "Are you using this certification to build proof or to avoid harder execution?", "choice", ["Build proof", "Avoid execution", "Both", "Not sure"], "new_goal", "motivation_notes", "medium"),
+    ("planning_01", "Planning Accuracy", "planning_accuracy", "When your plan fails, what is usually wrong: time estimate, energy, clarity, emotion, or interruption?", "choice", ["Time estimate", "Energy", "Clarity", "Emotion", "Interruption"], "missed_plan", "planning_pattern", "high"),
+    ("planning_02", "Planning Accuracy", "planning_accuracy", "What time of day do your plans become unrealistic?", "choice", ["Morning", "Afternoon", "Evening", "Late night", "It varies"], "weekly_review", "energy_patterns", "medium"),
+    ("planning_03", "Planning Accuracy", "planning_accuracy", "What do you keep putting on the plan but not actually doing?", "open", [], "weekly_review", "struggles", "high"),
+    ("planning_04", "Planning Accuracy", "planning_accuracy", "How often do you plan more than your energy can support?", "frequency", FREQUENCY_OPTIONS, "weekly_review", "planning_pattern", "medium"),
+    ("planning_05", "Planning Accuracy", "planning_accuracy", "What is the smallest version of today's must-win?", "open", [], "today_setup", "daily_minimum", "high"),
+    ("focus_01", "Focus Patterns", "focus_pattern", "What usually happens in the first five minutes before you drift?", "open", [], "focus_complete", "internal_trigger", "high"),
+    ("focus_02", "Focus Patterns", "focus_pattern", "Which environment makes focused work easiest?", "open", [], "season_setup", "constraints", "medium"),
+    ("focus_03", "Focus Patterns", "focus_pattern", "What is your most common external distraction?", "choice", ["Phone", "Messages", "Family", "Noise", "Browser tabs", "Work interruptions"], "focus_complete", "external_trigger", "high"),
+    ("focus_04", "Focus Patterns", "focus_pattern", "What pact would protect the next focus block?", "open", [], "focus_start", "personal_rule", "high"),
+    ("focus_05", "Focus Patterns", "focus_pattern", "What kind of task is hardest to start?", "choice", ["Reading", "Coding", "Writing", "Revision", "Practice problems", "Admin"], "weekly_review", "struggles", "medium"),
+    ("energy_01", "Energy", "energy", "When do you have the cleanest thinking energy?", "choice", ["Early morning", "Late morning", "Afternoon", "Evening", "Late night", "Unclear"], "season_setup", "energy_patterns", "high"),
+    ("energy_02", "Energy", "energy", "What drains your energy fastest during a normal day?", "open", [], "weekly_review", "energy_patterns", "medium"),
+    ("energy_03", "Energy", "energy", "What work should never be scheduled when energy is low?", "open", [], "weekly_planning", "personal_rule", "medium"),
+    ("energy_04", "Energy", "energy", "What recovery action reliably improves the next block?", "open", [], "focus_complete", "personal_rule", "medium"),
+    ("emotion_01", "Emotional Patterns", "emotion", "What feeling most often appears before avoidance?", "choice", ["Boredom", "Fear", "Shame", "Confusion", "Tiredness", "Resentment"], "missed_plan", "internal_trigger", "high"),
+    ("emotion_02", "Emotional Patterns", "emotion", "What goal carries the most emotional weight right now?", "open", [], "season_setup", "motivation_notes", "high"),
+    ("emotion_03", "Emotional Patterns", "emotion", "What would make you respect yourself at the end of this week?", "open", [], "weekly_planning", "values", "high"),
+    ("emotion_04", "Emotional Patterns", "emotion", "What are you afraid would be true if this goal failed?", "open", [], "day_21_review", "anti_vision", "medium"),
+    ("learning_01", "Learning Style", "learning_style", "Do you learn faster from courses, projects, notes, teaching, or tests?", "choice", ["Courses", "Projects", "Notes", "Teaching", "Tests"], "season_setup", "learning_style", "medium"),
+    ("learning_02", "Learning Style", "learning_style", "What proves you actually learned a topic?", "open", [], "weekly_review", "success_criteria", "medium"),
+    ("learning_03", "Learning Style", "learning_style", "When learning gets hard, do you switch topics, slow down, ask for help, or avoid?", "choice", ["Switch topics", "Slow down", "Ask for help", "Avoid", "Push through"], "weekly_review", "struggles", "medium"),
+    ("decision_01", "Decision Style", "decision_style", "When you are confused, do you collect more information or make a small test?", "choice", ["Collect information", "Make a small test", "Ask someone", "Delay", "Depends"], "research_save", "decision_style", "medium"),
+    ("decision_02", "Decision Style", "decision_style", "What decision are you postponing because both paths feel meaningful?", "open", [], "season_setup", "open_question", "high"),
+    ("decision_03", "Decision Style", "decision_style", "What evidence would change your mind?", "open", [], "research_save", "review_question", "high"),
+    ("family_01", "Family And Relationships", "relationships", "What family expectation is shaping your current priorities?", "open", [], "season_setup", "constraints", "medium"),
+    ("family_02", "Family And Relationships", "relationships", "What relationship investment should not disappear during ambition season?", "open", [], "weekly_planning", "personal_rule", "medium"),
+    ("money_01", "Money Pressure", "money", "What income or financial pressure is most affecting your decisions?", "open", [], "season_setup", "current_state", "medium"),
+    ("money_02", "Money Pressure", "money", "What action would improve your earning power fastest without destroying the primary season?", "open", [], "weekly_planning", "support_track", "high"),
+    ("health_01", "Health Foundation", "health", "What health habit most affects your execution quality?", "open", [], "season_setup", "personal_rule", "medium"),
+    ("health_02", "Health Foundation", "health", "What signal tells you that discipline is failing because recovery is missing?", "open", [], "weekly_review", "energy_patterns", "medium"),
+    ("environment_01", "Environment", "environment", "What object, app, or place most often pulls you away from the plan?", "open", [], "focus_complete", "external_trigger", "high"),
+    ("environment_02", "Environment", "environment", "What one environment change would make the next block easier?", "open", [], "focus_complete", "personal_rule", "high"),
+    ("self_honesty_01", "Self Honesty", "self_honesty", "What are you calling a goal that is currently only a hope?", "open", [], "day_7_review", "goal_conflict", "high"),
+    ("self_honesty_02", "Self Honesty", "self_honesty", "What result are you avoiding measuring?", "open", [], "day_14_review", "struggles", "high"),
+    ("self_honesty_03", "Self Honesty", "self_honesty", "What would an honest week look like if it was smaller but real?", "open", [], "weekly_planning", "planning_pattern", "high"),
+]
+
+def kairos_question(
+    qid: str,
+    section: str,
+    construct: str,
+    prompt: str,
+    response_type: str,
+    options: list[str],
+    trigger: str,
+    memory_target: str,
+    priority: str,
+) -> dict[str, Any]:
+    return {
+        "id": qid,
+        "section": section,
+        "construct": construct,
+        "prompt": prompt,
+        "response_type": response_type,
+        "options": options,
+        "source": "Kairos-native inspired prompt",
+        "trigger": trigger,
+        "memory_target": memory_target,
+        "priority": priority,
+        "use_for": [trigger, memory_target],
+    }
+
+KAIROS_NATIVE_QUESTIONS = [
+    kairos_question(*spec)
+    for spec in KAIROS_NATIVE_QUESTION_SPECS
+]
+
+IPIP_BIG_FIVE_ITEMS = [
+    ("IPIP Extraversion", "extraversion", "I am the life of the party."),
+    ("IPIP Extraversion", "extraversion", "I don't talk a lot."),
+    ("IPIP Extraversion", "extraversion", "I feel comfortable around people."),
+    ("IPIP Extraversion", "extraversion", "I keep in the background."),
+    ("IPIP Extraversion", "extraversion", "I start conversations."),
+    ("IPIP Extraversion", "extraversion", "I have little to say."),
+    ("IPIP Extraversion", "extraversion", "I talk to a lot of different people at parties."),
+    ("IPIP Extraversion", "extraversion", "I don't like to draw attention to myself."),
+    ("IPIP Extraversion", "extraversion", "I don't mind being the center of attention."),
+    ("IPIP Extraversion", "extraversion", "I am quiet around strangers."),
+    ("IPIP Agreeableness", "agreeableness", "I feel little concern for others."),
+    ("IPIP Agreeableness", "agreeableness", "I am interested in people."),
+    ("IPIP Agreeableness", "agreeableness", "I insult people."),
+    ("IPIP Agreeableness", "agreeableness", "I sympathize with others' feelings."),
+    ("IPIP Agreeableness", "agreeableness", "I am not interested in other people's problems."),
+    ("IPIP Agreeableness", "agreeableness", "I have a soft heart."),
+    ("IPIP Agreeableness", "agreeableness", "I am not really interested in others."),
+    ("IPIP Agreeableness", "agreeableness", "I take time out for others."),
+    ("IPIP Agreeableness", "agreeableness", "I feel others' emotions."),
+    ("IPIP Agreeableness", "agreeableness", "I make people feel at ease."),
+    ("IPIP Conscientiousness", "conscientiousness", "I am always prepared."),
+    ("IPIP Conscientiousness", "conscientiousness", "I leave my belongings around."),
+    ("IPIP Conscientiousness", "conscientiousness", "I pay attention to details."),
+    ("IPIP Conscientiousness", "conscientiousness", "I make a mess of things."),
+    ("IPIP Conscientiousness", "conscientiousness", "I get chores done right away."),
+    ("IPIP Conscientiousness", "conscientiousness", "I often forget to put things back in their proper place."),
+    ("IPIP Conscientiousness", "conscientiousness", "I like order."),
+    ("IPIP Conscientiousness", "conscientiousness", "I shirk my duties."),
+    ("IPIP Conscientiousness", "conscientiousness", "I follow a schedule."),
+    ("IPIP Conscientiousness", "conscientiousness", "I am exacting in my work."),
+    ("IPIP Emotional Stability", "emotional_stability", "I get stressed out easily."),
+    ("IPIP Emotional Stability", "emotional_stability", "I am relaxed most of the time."),
+    ("IPIP Emotional Stability", "emotional_stability", "I worry about things."),
+    ("IPIP Emotional Stability", "emotional_stability", "I seldom feel blue."),
+    ("IPIP Emotional Stability", "emotional_stability", "I am easily disturbed."),
+    ("IPIP Emotional Stability", "emotional_stability", "I get upset easily."),
+    ("IPIP Emotional Stability", "emotional_stability", "I change my mood a lot."),
+    ("IPIP Emotional Stability", "emotional_stability", "I have frequent mood swings."),
+    ("IPIP Emotional Stability", "emotional_stability", "I get irritated easily."),
+    ("IPIP Emotional Stability", "emotional_stability", "I often feel blue."),
+    ("IPIP Openness", "openness", "I have a rich vocabulary."),
+    ("IPIP Openness", "openness", "I have difficulty understanding abstract ideas."),
+    ("IPIP Openness", "openness", "I have a vivid imagination."),
+    ("IPIP Openness", "openness", "I am not interested in abstract ideas."),
+    ("IPIP Openness", "openness", "I have excellent ideas."),
+    ("IPIP Openness", "openness", "I do not have a good imagination."),
+    ("IPIP Openness", "openness", "I am quick to understand things."),
+    ("IPIP Openness", "openness", "I use difficult words."),
+    ("IPIP Openness", "openness", "I spend time reflecting on things."),
+    ("IPIP Openness", "openness", "I am full of ideas."),
+]
+
+QUESTION_BANK = KAIROS_QUESTIONS + KAIROS_NATIVE_QUESTIONS + [
+    {
+        "id": f"ipip_{construct}_{index:02d}",
+        "section": section,
+        "construct": construct,
+        "prompt": prompt,
+        "response_type": "likert",
+        "options": LIKERT_OPTIONS,
+        "source": "IPIP public domain Big-Five markers",
+        "trigger": "optional_profile",
+        "memory_target": "personality_signal",
+        "priority": "optional",
+        "use_for": ["optional_profile", "personality_signal"],
+    }
+    for index, (section, construct, prompt) in enumerate(IPIP_BIG_FIVE_ITEMS, start=1)
 ]
 
 
@@ -419,6 +583,53 @@ class NorthStar:
 
 
 @dataclass
+class CurrentSeason:
+    title: str = ""
+    goal_id: str = ""
+    primary_track: str = ""
+    support_track: str = ""
+    start_date: str = field(default_factory=lambda: date.today().isoformat())
+    end_date: str = field(default_factory=lambda: (date.today() + timedelta(days=20)).isoformat())
+    daily_minimum_minutes: int = 0
+    weekly_target_minutes: int = 0
+    success_criteria: str = ""
+    constraints: str = ""
+    paused_goals: str = ""
+    review_question: str = ""
+    day_7_review: str = ""
+    day_14_review: str = ""
+    day_21_review: str = ""
+    final_decision: str = ""
+    status: str = "active"
+    created_at: str = field(default_factory=timestamp)
+    updated_at: str = field(default_factory=timestamp)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "CurrentSeason":
+        return cls(
+            title=data.get("title", ""),
+            goal_id=data.get("goal_id", ""),
+            primary_track=data.get("primary_track", ""),
+            support_track=data.get("support_track", ""),
+            start_date=data.get("start_date") or date.today().isoformat(),
+            end_date=data.get("end_date") or (date.today() + timedelta(days=20)).isoformat(),
+            daily_minimum_minutes=max(0, int(data.get("daily_minimum_minutes", 0) or 0)),
+            weekly_target_minutes=max(0, int(data.get("weekly_target_minutes", 0) or 0)),
+            success_criteria=data.get("success_criteria", ""),
+            constraints=data.get("constraints", ""),
+            paused_goals=data.get("paused_goals", ""),
+            review_question=data.get("review_question", ""),
+            day_7_review=data.get("day_7_review", ""),
+            day_14_review=data.get("day_14_review", ""),
+            day_21_review=data.get("day_21_review", ""),
+            final_decision=data.get("final_decision", ""),
+            status=data.get("status", "active"),
+            created_at=data.get("created_at", timestamp()),
+            updated_at=data.get("updated_at", timestamp()),
+        )
+
+
+@dataclass
 class LifeArea:
     id: str
     name: str
@@ -496,6 +707,29 @@ class BrainAnswer:
 
 
 @dataclass
+class BrainMemory:
+    id: str
+    statement: str
+    memory_type: str = "pattern"
+    source_type: str = ""
+    source_id: str = ""
+    created_at: str = field(default_factory=timestamp)
+    updated_at: str = field(default_factory=timestamp)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "BrainMemory":
+        return cls(
+            id=data.get("id", f"memory-{uuid4().hex[:8]}"),
+            statement=data.get("statement", ""),
+            memory_type=data.get("memory_type", "pattern"),
+            source_type=data.get("source_type", ""),
+            source_id=data.get("source_id", ""),
+            created_at=data.get("created_at", timestamp()),
+            updated_at=data.get("updated_at", timestamp()),
+        )
+
+
+@dataclass
 class SearchMemoryItem:
     id: str
     query: str
@@ -520,6 +754,46 @@ class SearchMemoryItem:
         )
 
 
+@dataclass
+class ResearchSource:
+    title: str = ""
+    url: str = ""
+    snippet: str = ""
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ResearchSource":
+        return cls(
+            title=data.get("title", ""),
+            url=data.get("url", ""),
+            snippet=data.get("snippet", ""),
+        )
+
+
+@dataclass
+class ResearchSession:
+    id: str
+    question: str
+    answer: str = ""
+    sources: list[ResearchSource] = field(default_factory=list)
+    linked_to: str = ""
+    saved_insight: str = ""
+    created_at: str = field(default_factory=timestamp)
+    updated_at: str = field(default_factory=timestamp)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "ResearchSession":
+        return cls(
+            id=data.get("id", f"research-{uuid4().hex[:8]}"),
+            question=data.get("question", ""),
+            answer=data.get("answer", ""),
+            sources=[ResearchSource.from_dict(item) for item in data.get("sources", [])],
+            linked_to=data.get("linked_to", ""),
+            saved_insight=data.get("saved_insight", ""),
+            created_at=data.get("created_at", timestamp()),
+            updated_at=data.get("updated_at", timestamp()),
+        )
+
+
 class JsonStore:
     def __init__(self, data_dir: Path) -> None:
         self.data_dir = data_dir
@@ -531,10 +805,13 @@ class JsonStore:
         self.daily_logs_path = data_dir / "daily_logs.json"
         self.weekly_plans_path = data_dir / "weekly_plans.json"
         self.north_star_path = data_dir / "north_star.json"
+        self.current_season_path = data_dir / "current_season.json"
         self.life_areas_path = data_dir / "life_areas.json"
         self.brain_profile_path = data_dir / "brain_profile.json"
         self.brain_answers_path = data_dir / "brain_answers.json"
+        self.brain_memories_path = data_dir / "brain_memories.json"
         self.search_memory_path = data_dir / "search_memory.json"
+        self.research_sessions_path = data_dir / "research_sessions.json"
         self.vault_dir = Path(os.environ.get("KAIROS_VAULT_DIR", Path(__file__).resolve().parents[2] / "vault"))
         self._ensure_files()
 
@@ -556,14 +833,20 @@ class JsonStore:
             self._write_json(self.weekly_plans_path, [])
         if not self.north_star_path.exists():
             self.save_north_star(NorthStar())
+        if not self.current_season_path.exists():
+            self.save_current_season(CurrentSeason())
         if not self.life_areas_path.exists():
             self.save_life_areas(default_life_areas())
         if not self.brain_profile_path.exists():
             self.save_brain_profile(BrainProfile())
         if not self.brain_answers_path.exists():
             self._write_json(self.brain_answers_path, [])
+        if not self.brain_memories_path.exists():
+            self._write_json(self.brain_memories_path, [])
         if not self.search_memory_path.exists():
             self._write_json(self.search_memory_path, [])
+        if not self.research_sessions_path.exists():
+            self._write_json(self.research_sessions_path, [])
 
     def _read_json(self, path: Path, default: Any) -> Any:
         if not path.exists():
@@ -693,6 +976,15 @@ class JsonStore:
         north_star.updated_at = timestamp()
         self._write_json(self.north_star_path, asdict(north_star))
 
+    def load_current_season(self) -> CurrentSeason:
+        payload = self._read_json(self.current_season_path, {})
+        return CurrentSeason.from_dict(payload)
+
+    def save_current_season(self, season: CurrentSeason) -> CurrentSeason:
+        season.updated_at = timestamp()
+        self._write_json(self.current_season_path, asdict(season))
+        return season
+
     def load_life_areas(self) -> list[LifeArea]:
         payload = self._read_json(self.life_areas_path, [])
         areas = [LifeArea.from_dict(item) for item in payload]
@@ -720,6 +1012,32 @@ class JsonStore:
     def save_brain_answers(self, answers: list[BrainAnswer]) -> None:
         self._write_json(self.brain_answers_path, [asdict(answer) for answer in answers])
 
+    def load_brain_memories(self) -> list[BrainMemory]:
+        payload = self._read_json(self.brain_memories_path, [])
+        return [BrainMemory.from_dict(item) for item in payload]
+
+    def save_brain_memories(self, memories: list[BrainMemory]) -> None:
+        self._write_json(self.brain_memories_path, [asdict(memory) for memory in memories])
+
+    def add_brain_memory(
+        self,
+        statement: str,
+        memory_type: str = "pattern",
+        source_type: str = "",
+        source_id: str = "",
+    ) -> BrainMemory:
+        memory = BrainMemory(
+            id=f"memory-{uuid4().hex[:8]}",
+            statement=statement.strip(),
+            memory_type=memory_type.strip() or "pattern",
+            source_type=source_type.strip(),
+            source_id=source_id.strip(),
+        )
+        memories = self.load_brain_memories()
+        memories.append(memory)
+        self.save_brain_memories(memories)
+        return memory
+
     def add_brain_answer(self, question_id: str, answer_text: str) -> BrainAnswer:
         question = question_by_id(question_id)
         answer = BrainAnswer(
@@ -731,6 +1049,30 @@ class JsonStore:
             construct=question["construct"],
             section=question["section"],
             source=question["source"],
+        )
+        answers = self.load_brain_answers()
+        answers.append(answer)
+        self.save_brain_answers(answers)
+        self.synthesize_brain_profile_from_answer(answer)
+        return answer
+
+    def add_brain_reflection(
+        self,
+        prompt: str,
+        answer_text: str,
+        construct: str = "reflection",
+        section: str = "Triggered reflection",
+        source: str = "Kairos question engine",
+    ) -> BrainAnswer:
+        answer = BrainAnswer(
+            id=f"answer-{uuid4().hex[:8]}",
+            question_id="triggered_reflection",
+            prompt=prompt.strip() or "Triggered reflection",
+            response_type="open",
+            answer=answer_text.strip(),
+            construct=construct.strip() or "reflection",
+            section=section.strip() or "Triggered reflection",
+            source=source.strip() or "Kairos question engine",
         )
         answers = self.load_brain_answers()
         answers.append(answer)
@@ -769,6 +1111,44 @@ class JsonStore:
     def save_search_memory(self, items: list[SearchMemoryItem]) -> None:
         self._write_json(self.search_memory_path, [asdict(item) for item in items])
 
+    def load_research_sessions(self) -> list[ResearchSession]:
+        payload = self._read_json(self.research_sessions_path, [])
+        return [ResearchSession.from_dict(item) for item in payload]
+
+    def save_research_sessions(self, sessions: list[ResearchSession]) -> None:
+        self._write_json(self.research_sessions_path, [asdict(session) for session in sessions])
+
+    def add_research_session(
+        self,
+        question: str,
+        answer: str,
+        sources: list[ResearchSource],
+        linked_to: str = "",
+    ) -> ResearchSession:
+        session = ResearchSession(
+            id=f"research-{uuid4().hex[:8]}",
+            question=question.strip(),
+            answer=answer.strip(),
+            sources=sources,
+            linked_to=linked_to.strip(),
+        )
+        sessions = self.load_research_sessions()
+        sessions.append(session)
+        self.save_research_sessions(sessions)
+        return session
+
+    def confirm_research_insight(self, session_id: str, insight: str, linked_to: str = "") -> ResearchSession | None:
+        sessions = self.load_research_sessions()
+        for session in sessions:
+            if session.id != session_id:
+                continue
+            session.saved_insight = insight.strip()
+            session.linked_to = linked_to.strip()
+            session.updated_at = timestamp()
+            self.save_research_sessions(sessions)
+            return session
+        return None
+
     def add_search_memory(
         self,
         query: str,
@@ -800,15 +1180,19 @@ class JsonStore:
     ) -> None:
         profile = self.load_brain_profile()
         answers = self.load_brain_answers()
+        memories = self.load_brain_memories()
         searches = self.load_search_memory()
+        season = self.load_current_season()
         brain_dir = self.vault_dir / "10 Brain"
         research_dir = self.vault_dir / "20 Research"
         brain_dir.mkdir(parents=True, exist_ok=True)
         research_dir.mkdir(parents=True, exist_ok=True)
         (brain_dir / "Profile.md").write_text(render_brain_profile_markdown(profile, north_star), encoding="utf-8")
         (brain_dir / "North Star.md").write_text(render_north_star_markdown(north_star, goals), encoding="utf-8")
+        (brain_dir / "Current Season.md").write_text(render_current_season_markdown(season), encoding="utf-8")
         (brain_dir / "Current State.md").write_text(render_current_state_markdown(profile, areas), encoding="utf-8")
         (brain_dir / "Questionnaire History.md").write_text(render_answers_markdown(answers), encoding="utf-8")
+        (brain_dir / "Confirmed Memories.md").write_text(render_brain_memories_markdown(memories), encoding="utf-8")
         (research_dir / "Search Memory.md").write_text(render_search_memory_markdown(searches), encoding="utf-8")
 
     def update_life_area(
@@ -1133,7 +1517,6 @@ class MongoStore(JsonStore):
         self.client.admin.command("ping")
         self.collection: Collection = self.client[database][collection]
         self.vault_dir = Path(os.environ.get("KAIROS_VAULT_DIR", Path(__file__).resolve().parents[2] / "vault"))
-        self.collection.create_index("_id", unique=True)
         self._ensure_documents()
 
     def _ensure_documents(self) -> None:
@@ -1162,6 +1545,11 @@ class MongoStore(JsonStore):
             upsert=True,
         )
         self.collection.update_one(
+            {"_id": "current_season"},
+            {"$setOnInsert": {"data": asdict(CurrentSeason())}},
+            upsert=True,
+        )
+        self.collection.update_one(
             {"_id": "life_areas"},
             {"$setOnInsert": {"data": [asdict(area) for area in default_life_areas()]}},
             upsert=True,
@@ -1172,7 +1560,9 @@ class MongoStore(JsonStore):
             upsert=True,
         )
         self.collection.update_one({"_id": "brain_answers"}, {"$setOnInsert": {"data": []}}, upsert=True)
+        self.collection.update_one({"_id": "brain_memories"}, {"$setOnInsert": {"data": []}}, upsert=True)
         self.collection.update_one({"_id": "search_memory"}, {"$setOnInsert": {"data": []}}, upsert=True)
+        self.collection.update_one({"_id": "research_sessions"}, {"$setOnInsert": {"data": []}}, upsert=True)
 
     def _read_document(self, key: str, default: Any) -> Any:
         document = self.collection.find_one({"_id": key}, {"data": 1})
@@ -1254,6 +1644,15 @@ class MongoStore(JsonStore):
         north_star.updated_at = timestamp()
         self._write_document("north_star", asdict(north_star))
 
+    def load_current_season(self) -> CurrentSeason:
+        payload = self._read_document("current_season", {})
+        return CurrentSeason.from_dict(payload)
+
+    def save_current_season(self, season: CurrentSeason) -> CurrentSeason:
+        season.updated_at = timestamp()
+        self._write_document("current_season", asdict(season))
+        return season
+
     def load_life_areas(self) -> list[LifeArea]:
         payload = self._read_document("life_areas", [])
         areas = [LifeArea.from_dict(item) for item in payload]
@@ -1281,12 +1680,26 @@ class MongoStore(JsonStore):
     def save_brain_answers(self, answers: list[BrainAnswer]) -> None:
         self._write_document("brain_answers", [asdict(answer) for answer in answers])
 
+    def load_brain_memories(self) -> list[BrainMemory]:
+        payload = self._read_document("brain_memories", [])
+        return [BrainMemory.from_dict(item) for item in payload]
+
+    def save_brain_memories(self, memories: list[BrainMemory]) -> None:
+        self._write_document("brain_memories", [asdict(memory) for memory in memories])
+
     def load_search_memory(self) -> list[SearchMemoryItem]:
         payload = self._read_document("search_memory", [])
         return [SearchMemoryItem.from_dict(item) for item in payload]
 
     def save_search_memory(self, items: list[SearchMemoryItem]) -> None:
         self._write_document("search_memory", [asdict(item) for item in items])
+
+    def load_research_sessions(self) -> list[ResearchSession]:
+        payload = self._read_document("research_sessions", [])
+        return [ResearchSession.from_dict(item) for item in payload]
+
+    def save_research_sessions(self, sessions: list[ResearchSession]) -> None:
+        self._write_document("research_sessions", [asdict(session) for session in sessions])
 
 
 def create_store(data_dir: Path) -> JsonStore:
@@ -1359,6 +1772,11 @@ def seed_mongo_from_json(mongo_store: MongoStore, json_store: JsonStore) -> None
     if not north_star_is_empty(local_north_star) and north_star_is_empty(remote_north_star):
         mongo_store.save_north_star(local_north_star)
 
+    local_season = json_store.load_current_season()
+    remote_season = mongo_store.load_current_season()
+    if not current_season_is_empty(local_season) and current_season_is_empty(remote_season):
+        mongo_store.save_current_season(local_season)
+
     local_areas = json_store.load_life_areas()
     remote_areas = mongo_store.load_life_areas()
     if local_areas and life_areas_are_default(remote_areas):
@@ -1373,9 +1791,17 @@ def seed_mongo_from_json(mongo_store: MongoStore, json_store: JsonStore) -> None
     if local_answers and not mongo_store.load_brain_answers():
         mongo_store.save_brain_answers(local_answers)
 
+    local_memories = json_store.load_brain_memories()
+    if local_memories and not mongo_store.load_brain_memories():
+        mongo_store.save_brain_memories(local_memories)
+
     local_searches = json_store.load_search_memory()
     if local_searches and not mongo_store.load_search_memory():
         mongo_store.save_search_memory(local_searches)
+
+    local_research_sessions = json_store.load_research_sessions()
+    if local_research_sessions and not mongo_store.load_research_sessions():
+        mongo_store.save_research_sessions(local_research_sessions)
 
 
 def question_by_id(question_id: str) -> dict[str, Any]:
@@ -1486,6 +1912,59 @@ updated: {north_star.updated_at}
 """
 
 
+def render_current_season_markdown(season: CurrentSeason) -> str:
+    return f"""---
+type: kairos-current-season
+updated: {season.updated_at}
+---
+
+# Current 21-Day Season
+
+## Title
+{season.title or "Not defined yet."}
+
+## Linked Goal
+{season.goal_id or "Not linked yet."}
+
+## Primary Track
+{season.primary_track or "Not defined yet."}
+
+## Support Track
+{season.support_track or "Not defined yet."}
+
+## Dates
+{season.start_date} to {season.end_date}
+
+## Minimums
+- Daily minimum: {season.daily_minimum_minutes} minutes
+- Weekly target: {season.weekly_target_minutes} minutes
+
+## Success Criteria
+{season.success_criteria or "Not defined yet."}
+
+## Constraints
+{season.constraints or "Not defined yet."}
+
+## Paused Goals
+{season.paused_goals or "Not defined yet."}
+
+## Review Question
+{season.review_question or "Not defined yet."}
+
+## Day 7 Review
+{season.day_7_review or "Not recorded yet."}
+
+## Day 14 Review
+{season.day_14_review or "Not recorded yet."}
+
+## Day 21 Review
+{season.day_21_review or "Not recorded yet."}
+
+## Final Decision
+{season.final_decision or "Not recorded yet."}
+"""
+
+
 def render_current_state_markdown(profile: BrainProfile, areas: list[LifeArea]) -> str:
     area_rows = "\n".join(
         f"- {area.name}: score {area.current_score}/10, target {area.weekly_target_minutes} min/week. {area.notes or area.desired_state}"
@@ -1533,6 +2012,25 @@ type: kairos-questionnaire-history
 """
 
 
+def render_brain_memories_markdown(memories: list[BrainMemory]) -> str:
+    rows = []
+    for memory in sorted(memories, key=lambda item: item.created_at, reverse=True):
+        rows.append(
+            f"## {memory.created_at} - {memory.memory_type}\n"
+            f"- Statement: {memory.statement}\n"
+            f"- Source: {memory.source_type or 'manual'} {memory.source_id}\n"
+        )
+    body = "\n".join(rows) if rows else "No confirmed memories yet.\n"
+    return f"""---
+type: kairos-confirmed-memories
+---
+
+# Confirmed Memories
+
+{body}
+"""
+
+
 def render_search_memory_markdown(items: list[SearchMemoryItem]) -> str:
     rows = []
     for item in sorted(items, key=lambda entry: entry.created_at, reverse=True):
@@ -1567,6 +2065,27 @@ def north_star_is_empty(north_star: NorthStar) -> bool:
             north_star.anti_vision.strip(),
             north_star.alignment_notes.strip(),
             [item for item in north_star.top_priorities if item.strip()],
+        ]
+    )
+
+
+def current_season_is_empty(season: CurrentSeason) -> bool:
+    return not any(
+        [
+            season.title.strip(),
+            season.goal_id.strip(),
+            season.primary_track.strip(),
+            season.support_track.strip(),
+            season.success_criteria.strip(),
+            season.constraints.strip(),
+            season.paused_goals.strip(),
+            season.review_question.strip(),
+            season.day_7_review.strip(),
+            season.day_14_review.strip(),
+            season.day_21_review.strip(),
+            season.final_decision.strip(),
+            season.daily_minimum_minutes,
+            season.weekly_target_minutes,
         ]
     )
 

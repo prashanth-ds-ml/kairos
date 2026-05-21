@@ -1,0 +1,125 @@
+[
+  {
+    "id": "research-30a796ba",
+    "question": "what is attention is all you need paper",
+    "answer": "Research question: what is attention is all you need paper\n\nWorking answer:\n1. \" Attention Is All You Need \" [1] is a 2017 research paper in machine learning authored by eight scientists and engineers working at Google. The paper introduced a new deep learning architecture known as the transformer, based on the attention mechanism proposed in 2014 by Bahdanau et al.[2] The transformer approach it describes has become the main architecture of a wide variety of artificial ... [1]\n   Source: Attention Is All You Need - Wikipedia\n2. The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely ... [2]\n   Source: [1706.03762] Attention Is All You Need - arXiv.org\n3. Linear algebra. Lots of linear algebra. It really isn\u2019t rocket science or anything that someone with a Bachelor\u2019s could not do with a bit of guidance, just requires a different way of thinking about math in matrices Edit: You\u2019re a mechanical Eng so you really have the prerequisites. Learn the darn paper as you go! Just look up explanations of dot product attention and the QKV matrix and until you find one that sticks and write it down. Sorry that\u2019s all I got More on reddit.com [3]\n   Source: r/learnmachinelearning on Reddit: The background needed to understand \"Attention is All You Need\" Paper\n4. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. [4]\n   Source: Attention is All You Need - Google Research\n5. Not only do individual attention \u00b7 heads clearly learn to perform different tasks, many appear to exhibit behavior related to the syntactic ... This section describes the training regime for our models. ... We trained our models on one machine with 8 NVIDIA P100 GPUs. For our base models using \u00b7 the hyperparameters described throughout the paper, each training step took about 0.4 seconds. [5]\n   Source: Attention Is All You Need Ashish Vaswani\u2217 Google Brain avaswani@google.com\n\nHow to use this:\nTreat this as a source-backed first pass, then open the strongest sources and save only the insight that changes a goal, season, or decision.",
+    "sources": [
+      {
+        "title": "Attention Is All You Need - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Attention_Is_All_You_Need",
+        "snippet": "\" Attention Is All You Need \" [1] is a 2017 research paper in machine learning authored by eight scientists and engineers working at Google. The paper introduced a new deep learning architecture known as the transformer, based on the attention mechanism proposed in 2014 by Bahdanau et al.[2] The transformer approach it describes has become the main architecture of a wide variety of artificial ..."
+      },
+      {
+        "title": "[1706.03762] Attention Is All You Need - arXiv.org",
+        "url": "https://arxiv.org/abs/1706.03762",
+        "snippet": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely ..."
+      },
+      {
+        "title": "r/learnmachinelearning on Reddit: The background needed to understand \"Attention is All You Need\" Paper",
+        "url": "https://www.reddit.com/r/learnmachinelearning/comments/17ywtkd/the_background_needed_to_understand_attention_is/",
+        "snippet": "Linear algebra. Lots of linear algebra. It really isn\u2019t rocket science or anything that someone with a Bachelor\u2019s could not do with a bit of guidance, just requires a different way of thinking about math in matrices Edit: You\u2019re a mechanical Eng so you really have the prerequisites. Learn the darn paper as you go! Just look up explanations of dot product attention and the QKV matrix and until you find one that sticks and write it down. Sorry that\u2019s all I got More on reddit.com"
+      },
+      {
+        "title": "Attention is All You Need - Google Research",
+        "url": "https://research.google/pubs/attention-is-all-you-need/",
+        "snippet": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train."
+      },
+      {
+        "title": "Attention Is All You Need Ashish Vaswani\u2217 Google Brain avaswani@google.com",
+        "url": "https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf",
+        "snippet": "Not only do individual attention \u00b7 heads clearly learn to perform different tasks, many appear to exhibit behavior related to the syntactic ... This section describes the training regime for our models. ... We trained our models on one machine with 8 NVIDIA P100 GPUs. For our base models using \u00b7 the hyperparameters described throughout the paper, each training step took about 0.4 seconds."
+      },
+      {
+        "title": "PDF Attention Is All You Need - NIPS",
+        "url": "https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf",
+        "snippet": "Equal contribution. Listing order is random. Jakob proposed replacing RNNs with self-attention and started the effort to evaluate this idea. Ashish, with Illia, designed and implemented the first Transformer models and has been crucially involved in every aspect of this work. Noam proposed scaled dot-product attention, multi-head attention and the parameter-free position representation and ..."
+      }
+    ],
+    "linked_to": "",
+    "saved_insight": "",
+    "created_at": "2026-05-18T15:17:08",
+    "updated_at": "2026-05-18T15:17:08"
+  },
+  {
+    "id": "research-3d8bcbc2",
+    "question": "what is attention is all you need paper",
+    "answer": "Research question: what is attention is all you need paper\n\nWorking answer:\n1. \" Attention Is All You Need \" [1] is a 2017 research paper in machine learning authored by eight scientists and engineers working at Google. The paper introduced a new deep learning architecture known as the transformer, based on the attention mechanism proposed in 2014 by Bahdanau et al.[2] The transformer approach it describes has become the main architecture of a wide variety of artificial ... [1]\n   Source: Attention Is All You Need - Wikipedia\n2. The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely ... [2]\n   Source: [1706.03762] Attention Is All You Need - arXiv.org\n3. Linear algebra. Lots of linear algebra. It really isn\u2019t rocket science or anything that someone with a Bachelor\u2019s could not do with a bit of guidance, just requires a different way of thinking about math in matrices Edit: You\u2019re a mechanical Eng so you really have the prerequisites. Learn the darn paper as you go! Just look up explanations of dot product attention and the QKV matrix and until you find one that sticks and write it down. Sorry that\u2019s all I got More on reddit.com [3]\n   Source: r/learnmachinelearning on Reddit: The background needed to understand \"Attention is All You Need\" Paper\n4. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. [4]\n   Source: Attention is All You Need - Google Research\n5. Not only do individual attention \u00b7 heads clearly learn to perform different tasks, many appear to exhibit behavior related to the syntactic ... This section describes the training regime for our models. ... We trained our models on one machine with 8 NVIDIA P100 GPUs. For our base models using \u00b7 the hyperparameters described throughout the paper, each training step took about 0.4 seconds. [5]\n   Source: Attention Is All You Need Ashish Vaswani\u2217 Google Brain avaswani@google.com\n\nHow to use this:\nTreat this as a source-backed first pass, then open the strongest sources and save only the insight that changes a goal, season, or decision.",
+    "sources": [
+      {
+        "title": "Attention Is All You Need - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Attention_Is_All_You_Need",
+        "snippet": "\" Attention Is All You Need \" [1] is a 2017 research paper in machine learning authored by eight scientists and engineers working at Google. The paper introduced a new deep learning architecture known as the transformer, based on the attention mechanism proposed in 2014 by Bahdanau et al.[2] The transformer approach it describes has become the main architecture of a wide variety of artificial ..."
+      },
+      {
+        "title": "[1706.03762] Attention Is All You Need - arXiv.org",
+        "url": "https://arxiv.org/abs/1706.03762",
+        "snippet": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely ..."
+      },
+      {
+        "title": "r/learnmachinelearning on Reddit: The background needed to understand \"Attention is All You Need\" Paper",
+        "url": "https://www.reddit.com/r/learnmachinelearning/comments/17ywtkd/the_background_needed_to_understand_attention_is/",
+        "snippet": "Linear algebra. Lots of linear algebra. It really isn\u2019t rocket science or anything that someone with a Bachelor\u2019s could not do with a bit of guidance, just requires a different way of thinking about math in matrices Edit: You\u2019re a mechanical Eng so you really have the prerequisites. Learn the darn paper as you go! Just look up explanations of dot product attention and the QKV matrix and until you find one that sticks and write it down. Sorry that\u2019s all I got More on reddit.com"
+      },
+      {
+        "title": "Attention is All You Need - Google Research",
+        "url": "https://research.google/pubs/attention-is-all-you-need/",
+        "snippet": "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train."
+      },
+      {
+        "title": "Attention Is All You Need Ashish Vaswani\u2217 Google Brain avaswani@google.com",
+        "url": "https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf",
+        "snippet": "Not only do individual attention \u00b7 heads clearly learn to perform different tasks, many appear to exhibit behavior related to the syntactic ... This section describes the training regime for our models. ... We trained our models on one machine with 8 NVIDIA P100 GPUs. For our base models using \u00b7 the hyperparameters described throughout the paper, each training step took about 0.4 seconds."
+      },
+      {
+        "title": "PDF Attention Is All You Need - NIPS",
+        "url": "https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf",
+        "snippet": "Equal contribution. Listing order is random. Jakob proposed replacing RNNs with self-attention and started the effort to evaluate this idea. Ashish, with Illia, designed and implemented the first Transformer models and has been crucially involved in every aspect of this work. Noam proposed scaled dot-product attention, multi-head attention and the parameter-free position representation and ..."
+      }
+    ],
+    "linked_to": "",
+    "saved_insight": "",
+    "created_at": "2026-05-18T15:25:18",
+    "updated_at": "2026-05-18T15:25:18"
+  },
+  {
+    "id": "research-e5c3f42e",
+    "question": "can you tell me about RAG systems",
+    "answer": "Research question: can you tell me about RAG systems\n\nWorking answer:\n1. Retrieval-Augmented Generation (RAG) is a way to make AI answers more reliable by combining searching for relevant information and then generating a response. Instead of guessing based only on old training data, it first finds useful data from external sources (like documents or databases) and then uses it to give a better answer. Fetches up-to-date data and reduces incorrect or made-up ... [1]\n   Source: What is Retrieval-Augmented Generation (RAG) - GeeksforGeeks\n2. Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources. [1] With RAG, LLMs first refer to a specified set of documents, then respond to user queries. These documents supplement information from the LLM's pre-existing training data. [2] This allows LLMs to use domain-specific and/or ... [2]\n   Source: Retrieval-augmented generation - Wikipedia\n3. This project will help you understand the key components of RAG systems and how they can be implemented using fundamental programming concepts. What is RAG? [3]\n   Source: Building Your Own RAG System from Scratch: A Step-by-Step Guide - Medium\n4. Retrieval-Augmented Generation (RAG) is changing how modern AI systems deliver answers. Instead of relying only on pre-trained knowledge, RAG connects large language models (LLMs) to real-time, external data sources. This simple shift makes AI responses more accurate, more current, and far more useful in real-world scenarios. [4]\n   Source: What is Retrieval-Augmented Generation (RAG) : A Complete Guide\n5. RAG connects LLMs to your data for grounded, up-to-date answers. Architecture, costs, and production lessons from 12+ deployments at MarsDevs in 2026. [5]\n   Source: What Is RAG in AI? 2026 Production Guide | MarsDevs\n\nHow to use this:\nTreat this as a source-backed first pass, then open the strongest sources and save only the insight that changes a goal, season, or decision.",
+    "sources": [
+      {
+        "title": "What is Retrieval-Augmented Generation (RAG) - GeeksforGeeks",
+        "url": "https://www.geeksforgeeks.org/nlp/what-is-retrieval-augmented-generation-rag/",
+        "snippet": "Retrieval-Augmented Generation (RAG) is a way to make AI answers more reliable by combining searching for relevant information and then generating a response. Instead of guessing based only on old training data, it first finds useful data from external sources (like documents or databases) and then uses it to give a better answer. Fetches up-to-date data and reduces incorrect or made-up ..."
+      },
+      {
+        "title": "Retrieval-augmented generation - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Retrieval-augmented_generation",
+        "snippet": "Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources. [1] With RAG, LLMs first refer to a specified set of documents, then respond to user queries. These documents supplement information from the LLM's pre-existing training data. [2] This allows LLMs to use domain-specific and/or ..."
+      },
+      {
+        "title": "Building Your Own RAG System from Scratch: A Step-by-Step Guide - Medium",
+        "url": "https://medium.com/@anish.chitturu/building-your-own-rag-system-from-scratch-a-step-by-step-guide-7186fcbb3b14",
+        "snippet": "This project will help you understand the key components of RAG systems and how they can be implemented using fundamental programming concepts. What is RAG?"
+      },
+      {
+        "title": "What is Retrieval-Augmented Generation (RAG) : A Complete Guide",
+        "url": "https://www.aitude.com/what-is-retrieval-augmented-generation-rag-a-complete-guide/",
+        "snippet": "Retrieval-Augmented Generation (RAG) is changing how modern AI systems deliver answers. Instead of relying only on pre-trained knowledge, RAG connects large language models (LLMs) to real-time, external data sources. This simple shift makes AI responses more accurate, more current, and far more useful in real-world scenarios."
+      },
+      {
+        "title": "What Is RAG in AI? 2026 Production Guide | MarsDevs",
+        "url": "https://www.marsdevs.com/blog/what-is-rag-in-ai-the-2026-production-guide",
+        "snippet": "RAG connects LLMs to your data for grounded, up-to-date answers. Architecture, costs, and production lessons from 12+ deployments at MarsDevs in 2026."
+      },
+      {
+        "title": "14 types of RAG (Retrieval-Augmented Generation) | Meilisearch",
+        "url": "https://www.meilisearch.com/blog/rag-types",
+        "snippet": "For example, simple RAG can handle quick and straightforward queries. But if you are working on complex research or handling messy data, you might consider something smarter, such as agentic or self-RAG. Now, let's see the importance of RAG. What is the importance of RAG? RAG is a technique that combines information retrieval with generative AI."
+      }
+    ],
+    "linked_to": "",
+    "saved_insight": "",
+    "created_at": "2026-05-18T15:29:20",
+    "updated_at": "2026-05-18T15:29:20"
+  }
+]

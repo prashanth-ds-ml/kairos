@@ -1,9 +1,13 @@
 # Kairos Implementation Roadmap
 
 Role: Product Manager / Technical Lead  
-Review date: 2026-05-16
+Review date: 2026-05-18
 
-Current status: the core local redesign is implemented for Today, Focus, Goals, Review, Areas, Weekly, Research, Brain, and Coach. The app now uses static CSS/JS assets, Review includes charts and a focus heatmap, Weekly supports capacity planning and rollover, Research supports SearXNG-backed read/save memory, and Coach can call Hugging Face Inference Providers with `Qwen/Qwen2.5-7B-Instruct-1M` plus a local fallback.
+Current status: the core local redesign is implemented for Today, Season, Focus, Goals, Review, Areas, Weekly, Research, Brain, and Coach. The app now uses static CSS/JS assets, Review includes charts and a focus heatmap, Weekly supports capacity planning and rollover, Season manages the current 21-day operating agreement, Research supports SearXNG-backed read/save sessions, Brain stores confirmed memories and memory candidates, and Coach can call Hugging Face Inference Providers with `Qwen/Qwen2.5-7B-Instruct-1M` plus a local fallback.
+
+Update 2026-05-18: active development moved CLI-first. The web app remains intact as the visual/reference interface, while the terminal workflow now uses the same storage layer so real work can be tracked while Kairos is being built. MongoDB is the expected cross-machine persistence path; `kairos status` keeps storage mode, completed work, and next action visible before more work is tracked.
+
+Update 2026-05-18: Kairos has moved from a 90-day planning assumption to a 21-day primary track. `/season` now has a persisted CurrentSeason model, day progress, daily and weekly minute targets, checkpoint notes, suggested season defaults, and actions to apply empty fields or update North Star/Areas from the current direction. Today surfaces a state-aware reflection. Brain now leads with recommended questions, keeps the full 121-question bank collapsed as a library, and separates confirmed memories from candidates. Research stores source-backed sessions and can save selected insights into Brain memory. Playwright smoke covers Today, Season, Brain, Research, Weekly, Review, Goals, Areas, Focus, North Star, Coach, and mobile Today.
 
 Update 2026-05-15: Kairos now has the first local Brain vertical slice. The app includes Brain profile storage, a psychological question engine, saved search memory, optional SearXNG search, Coach brain context, and Obsidian vault sync for Brain and Research notes.
 
@@ -21,6 +25,9 @@ Use the current Kairos foundation to build a practical personal discipline syste
 - Store raw answers separately from Kairos-generated summaries.
 - Use psychological questionnaires for self-understanding and personalization, not diagnosis.
 - Keep Today as the main daily workspace.
+- Keep Season as the 21-day operating agreement.
+- Build CLI-first for the next development phase and keep the terminal loop reliable for real daily use.
+- Keep the CLI and web app on the same storage abstractions.
 - Avoid building a generic task manager.
 - Prefer small, complete behavior loops over many disconnected features.
 - Use Playwright screenshots and smoke tests after every meaningful UI change.
@@ -41,11 +48,12 @@ Documentation map: start with `docs/README.md`. The blueprint defines the produc
 Core loop:
 
 1. Direction: North Star and Areas define values.
-2. Weekly commitment: Plan Week sets realistic capacity and goal allocation.
-3. Today: one state-aware next action.
-4. Focus: execute one block with a pact.
-5. Check-in: record result, friction, energy, mood, and quality when useful.
-6. Review: learn what happened and adjust the system.
+2. Season: choose the protected 21-day primary track, support track, constraints, and paused goals.
+3. Weekly commitment: Plan Week sets realistic capacity and goal allocation.
+4. Today: one state-aware next action.
+5. Focus: execute one block with a pact.
+6. Brain and Research: capture durable patterns and source-backed insights.
+7. Review: learn what happened and adjust the system.
 
 Design rule:
 
@@ -81,7 +89,26 @@ Testing:
 Status:
 
 - Implemented locally.
-- Today is now the main command center and the block composer is collapsed by default.
+- Today is now the main command center, shows a state-aware reflection, and the block composer is collapsed by default.
+
+## Phase 1.5: Build The 21-Day Season Loop
+
+Objective: Make the user's current primary track explicit enough to guide Today, Weekly, Review, Brain, and Coach.
+
+Implemented:
+
+- Added persisted CurrentSeason storage for JSON and MongoDB.
+- Added `/season` with start/end dates, day progress, daily minimum, weekly target, success criteria, constraints, paused goals, and day 7/14/21 checkpoint notes.
+- Added suggested season defaults from active goals and Brain context.
+- Added actions to apply empty fields and update Direction/Areas from the current season.
+- Added Season panels on Today and Review.
+
+Next improvements:
+
+- Use Season as the default filter for Today auto-plan.
+- Add explicit Day 7, Day 14, and Day 21 review flows.
+- Show season evidence in Review before detailed analytics.
+- Add a "pause or continue" decision at the end of Day 21.
 
 ## Phase 0: Local Brain And Question Engine
 
@@ -90,19 +117,19 @@ Objective: Build Kairos into a local cognitive mirror that understands the user'
 Implemented:
 
 - Added `/brain` with editable Brain Profile fields for identity, values, anti-vision, current state, strengths, struggles, energy patterns, and motivation notes.
-- Added a reusable question bank with Likert, frequency, ranking, choice, and open-response prompts.
+- Added a reusable 121-question bank with Likert, frequency, ranking, choice, and open-response prompts.
 - Added answer persistence for raw questionnaire responses.
 - Added `/research` with optional local SearXNG search through `KAIROS_SEARXNG_URL`.
-- Saved only search queries plus selected/saved results by default.
+- Saved source-backed research sessions and selected durable insights by default.
+- Added confirmed Brain memories and memory candidates from answers and research.
 - Added Obsidian sync into `vault/10 Brain` and `vault/20 Research`.
 - Extended Coach context with confirmed Brain profile, recent answers, and saved research.
 
 Next improvements:
 
-- Add user confirmation before synthesized BrainProfile updates are inferred from raw answers.
-- Add scoring summaries for public-domain or permission-safe instruments such as IPIP-inspired traits, WHO-5-inspired wellbeing, and Self-Determination Theory needs.
-- Add contextual one-question prompts after missed plans, blocked sessions, repeated distractions, and weekly review.
-- Add delete/forget controls for Brain answers and saved research.
+- Add delete/forget controls for Brain answers, memories, saved research, and research sessions.
+- Add scoring summaries for public-domain or permission-safe instruments such as IPIP traits and Kairos-native wellbeing/self-determination inspired prompts.
+- Add more contextual one-question prompts after missed plans, blocked sessions, repeated distractions, and weekly review.
 
 Acceptance criteria:
 
@@ -298,16 +325,18 @@ Recommended refactors:
 
 ## Immediate Next Build Order
 
-1. Simplify Today into a Now-first command center.
-2. Merge Today's operating checklist and Daily Discipline form into one interactive loop.
-3. Collapse the full timeboxed schedule and backlog behind clear "Edit schedule" and "Add work" actions.
-4. Redesign Weekly as guided capacity planning with realism warnings and area/goal allocation.
-5. Redesign Review's top section around learning: planned vs actual, best goal, neglected area, main friction, suggested adjustment.
-6. Make North Star read-first with edit-on-demand.
-7. Add contextual Coach prompts to Today, Weekly, Review, Goals, and Focus.
-8. Add first-run setup: season focus, area scores, 1-3 goals, weekly capacity, first block.
-9. Add Career Evidence / proof-of-work tracking.
-10. Harden hosted deployment with backup/export and storage health.
+1. Keep `kairos` / `kairos home` as the command center: season, discipline progress, XP, completed work, next action, and fast commands.
+2. Keep `kairos status` accurate: storage mode, MongoDB/JSON status, current season, today's commitments, focus minutes, completed goal/task work, and next action.
+3. Keep `kairos season` able to create or update the 21-day operating agreement.
+4. Keep `kairos today plan` able to choose 1-3 commitments from active goal tasks.
+5. Keep `kairos goal create` and `kairos goal add-task` fast enough for real goal maintenance during work.
+6. Keep `kairos focus` / `kairos focus start` reliable: terminal countdown, focus-end alert, result save, and task status update.
+7. Add later CLI review commands only after the daily loop remains stable in real use.
+8. Use Kairos daily while building so Today, Focus, Research, and Brain accumulate real data.
+9. Tighten Season-driven auto-plan so Today favors the protected 21-day primary track.
+10. Add Day 7, Day 14, and Day 21 Season review decisions.
+11. Improve Research into a fuller Perplexity-style session: source list, answer, read view, save memory, and revisit thread.
+12. Add delete/forget controls for Brain memories, answers, saved research, and research sessions.
 
 ## Risk Notes
 
