@@ -26,6 +26,103 @@ For one-shot status without entering the session:
 kairos status
 ```
 
+## Install On A New Machine
+
+Prerequisites:
+
+- Python 3.10 or newer
+- Git
+- Optional: MongoDB if you want the same Kairos data across machines
+
+Clone Kairos:
+
+```powershell
+git clone https://github.com/prashanth-ds-ml/kairos.git
+cd kairos
+```
+
+Create a virtual environment:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+On macOS or Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Install the CLI:
+
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+Verify it:
+
+```powershell
+kairos --version
+kairos doctor
+kairos paths
+```
+
+Run it:
+
+```powershell
+kairos
+```
+
+If the shell cannot find `kairos`, check whether Python can run it and where user scripts are installed:
+
+```powershell
+python -m kairos.cli --version
+python -m site --user-base
+```
+
+Add the Python scripts directory under that user base to `PATH`. On Windows it is usually similar to:
+
+```powershell
+C:\Users\<you>\AppData\Roaming\Python\Python312\Scripts
+```
+
+Use local JSON storage on one machine:
+
+```powershell
+kairos config set KAIROS_STORAGE json
+```
+
+Use MongoDB for the same data on multiple machines:
+
+```powershell
+kairos config set KAIROS_STORAGE mongodb
+kairos config set KAIROS_MONGODB_URI "<your MongoDB URI>"
+kairos config set KAIROS_MONGODB_DATABASE kairos
+kairos config set KAIROS_MONGODB_COLLECTION state
+```
+
+Config and local fallback data live here on Windows:
+
+```powershell
+C:\Users\<you>\.kairos
+```
+
+On macOS or Linux:
+
+```bash
+~/.kairos
+```
+
+Update an existing install:
+
+```powershell
+git pull
+python -m pip install -e . --upgrade
+```
+
 ## Quick Guide
 
 Start Kairos:

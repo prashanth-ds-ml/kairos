@@ -4,6 +4,103 @@ Kairos is now usable as a small personal web app backed by MongoDB, so the same 
 
 Current direction: keep the web app as the visual/reference interface, but move active development to a CLI-first workflow so Kairos can track real work while it is being built.
 
+## Install The CLI On Another Machine
+
+Prerequisites:
+
+- Python 3.10 or newer
+- Git
+- Optional but recommended: a MongoDB URI if you want the same Kairos data on multiple machines
+
+Clone the repo:
+
+```powershell
+git clone https://github.com/prashanth-ds-ml/kairos.git
+cd kairos
+```
+
+Create and activate a virtual environment:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+On macOS or Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Install Kairos as a terminal command:
+
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+Verify the CLI:
+
+```powershell
+kairos --version
+kairos doctor
+kairos paths
+```
+
+Start Kairos:
+
+```powershell
+kairos
+```
+
+If `kairos` is not found after install, run it through Python once and check the script path:
+
+```powershell
+python -m kairos.cli --version
+python -m site --user-base
+```
+
+Then add the Python scripts directory under that user base to your `PATH`. On Windows this is usually similar to:
+
+```powershell
+C:\Users\<you>\AppData\Roaming\Python\Python312\Scripts
+```
+
+For local-only use, keep the default JSON fallback or explicitly set:
+
+```powershell
+kairos config set KAIROS_STORAGE json
+```
+
+For cross-machine use, configure MongoDB so every installed CLI points at the same data store:
+
+```powershell
+kairos config set KAIROS_STORAGE mongodb
+kairos config set KAIROS_MONGODB_URI "<your MongoDB URI>"
+kairos config set KAIROS_MONGODB_DATABASE kairos
+kairos config set KAIROS_MONGODB_COLLECTION state
+```
+
+Kairos stores per-machine config and local fallback data under:
+
+```powershell
+C:\Users\<you>\.kairos
+```
+
+On macOS or Linux, the equivalent directory is:
+
+```bash
+~/.kairos
+```
+
+Update an existing install:
+
+```powershell
+git pull
+python -m pip install -e . --upgrade
+```
+
 ## Run Locally
 
 Install the CLI once as a user-level command:
