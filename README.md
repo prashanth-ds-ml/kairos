@@ -253,6 +253,12 @@ kairos
 
 The home screen shows the current 21-day season, a daily discipline progress bar, completed minutes as XP, today's selected commitments, completed goals/tasks, and the next focus target.
 
+Kairos refreshes the configured storage before the command center is drawn. During an interactive session, use `refresh`, `reload`, `sync`, or `home` to reload the latest state without restarting:
+
+```text
+kairos> refresh
+```
+
 Current daily loop:
 
 ```powershell

@@ -211,6 +211,18 @@ kairos home
 
 `kairos` and `kairos home` show the command center: season, discipline progress, XP-style completed minutes, today's plan count, next focus target, completed work for today, and fast commands.
 
+At startup, Kairos refreshes the configured storage before drawing the command center. In an interactive session, redraw the latest state without restarting:
+
+```text
+kairos> refresh
+```
+
+One-shot equivalent:
+
+```powershell
+kairos refresh
+```
+
 ## Daily Use
 
 Show current storage, season, today's commitments, focus minutes, completed work grouped by priority/goal/task, and next action:

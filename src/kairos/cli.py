@@ -74,7 +74,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     raw_args = list(sys.argv[1:] if argv is None else argv)
     raw_args = normalize_help_args(raw_args)
     if not raw_args:
-        run_interactive(open_store())
+        run_interactive(refresh_store(open_store()))
         return 0
     return run_typer(raw_args)
 
@@ -110,6 +110,10 @@ def run_interactive(store: JsonStore) -> None:
         if raw in {"quickstart", "guide"}:
             print_quickstart()
             continue
+        if raw in {"refresh", "reload", "sync", "home"}:
+            store = refresh_store(open_store())
+            print_home(store)
+            continue
         try:
             args = shlex.split(raw)
         except ValueError as exc:
@@ -134,6 +138,7 @@ def print_interactive_help() -> None:
     table.add_column("Purpose")
     rows = [
         ("status", "Show current state"),
+        ("refresh / reload / home", "Reload storage and redraw command center"),
         ("quickstart", "Show the focus workflow guide"),
         ("daily", "Run daily check-in"),
         ("goal create / create goal", "Create a goal"),
@@ -320,7 +325,13 @@ def cli_callback(
 @app.command("home")
 def home_command() -> None:
     """Show the Kairos home screen."""
-    print_home(open_store())
+    print_home(refresh_store(open_store()))
+
+
+@app.command("refresh")
+def refresh_command() -> None:
+    """Reload storage and show the Kairos command center."""
+    print_home(refresh_store(open_store()))
 
 
 @app.command("status")
@@ -746,6 +757,15 @@ def user_config_dir() -> Path:
 
 def open_store() -> JsonStore:
     return create_store(default_data_dir())
+
+
+def refresh_store(store: JsonStore) -> JsonStore:
+    store.load_goals()
+    store.load_sessions()
+    store.load_today_plan()
+    store.load_current_season()
+    store.load_settings()
+    return store
 
 
 def default_data_dir() -> Path:
@@ -1475,6 +1495,7 @@ def print_session_header() -> None:
     table.add_row("version:", package_version())
     table.add_row("home:", str(user_config_dir()))
     table.add_row("storage:", os.environ.get("KAIROS_STORAGE", "mongodb"))
+    table.add_row("refreshed:", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     table.add_row("directory:", str(Path.cwd()))
     console.print(
         Panel(
