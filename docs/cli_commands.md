@@ -131,6 +131,8 @@ Start Kairos:
 kairos
 ```
 
+On the first interactive open of a new day, Kairos starts with today check-in, saves the daily log, then asks whether you want to pick one to three commitments or go with the flow and record tasks as they happen. Daily check-in uses a mixed question set: stable open check-in prompts plus coverage-aware rotating open, choice, frequency, ranking, and agree/disagree questions from the Brain question bank. Each saved answer keeps the question id and timestamp so repeated answers can be compared over time.
+
 Inside Kairos, use this normal flow:
 
 ```text
@@ -209,7 +211,7 @@ Show the top-level home screen:
 kairos home
 ```
 
-`kairos` and `kairos home` show the command center: season, discipline progress, XP-style completed minutes, today's plan count, next focus target, completed work for today, and fast commands.
+`kairos` and `kairos home` show the command center: season, discipline progress, XP-style completed minutes, today's plan count, completed work for today, and fast commands.
 
 At startup, Kairos refreshes the configured storage before drawing the command center. In an interactive session, redraw the latest state without restarting:
 
@@ -225,7 +227,7 @@ kairos refresh
 
 ## Daily Use
 
-Show current storage, season, today's commitments, focus minutes, completed work grouped by priority/goal/task, and next action:
+Show current storage, season, today's commitments, focus minutes, and completed work grouped by priority/goal/task:
 
 ```powershell
 kairos status
@@ -255,7 +257,19 @@ Preview today's daily questions without saving answers:
 kairos daily --dry-run
 ```
 
-Show today's commitments and next focus target:
+The bank includes personality, identity, values, motivation, planning, focus, energy, emotion, learning, decision style, situation simulation, stress defaults, communication style, boundaries, constraint preferences, and belief evolution. Answers are saved into Kairos Brain storage as raw timestamped records. To write the readable markdown brain into the vault:
+
+```powershell
+kairos brain status
+kairos brain rebuild
+kairos brain sync
+```
+
+`kairos brain rebuild` regenerates the personal-brain layer from raw data: observations, inferred patterns, evidence counts, confidence, recency, and contradictions. The sync writes files such as `vault/10 Brain/Personal Brain.md`, `Questionnaire History.md`, `Profile.md`, `Current State.md`, and `Confirmed Memories.md`.
+
+Kairos prints small ASCII stamps when tasks are captured, focus blocks are logged, the day is closed, or the Brain is rebuilt. Set `KAIROS_NO_ART=1` to hide these stamps in scripts.
+
+Show today's commitments:
 
 ```powershell
 kairos today
@@ -266,6 +280,26 @@ Plan 1-3 commitments for today:
 ```powershell
 kairos today plan
 ```
+
+The current 21-day season appears at the top of the pick list, even if it is not linked to a normal goal task yet. This keeps the protected season visible and makes it easy to log at least one season block.
+
+Use flow mode when the day is uncertain and you want to choose focus targets as work happens:
+
+```powershell
+kairos today flow
+```
+
+Capture an ad-hoc flow task:
+
+```powershell
+kairos today add --title "Reply to client escalation" --domain work --category career
+kairos today add --title "Book doctor appointment" --domain personal --category health
+kairos today add --title "Pay credit card bill" --domain personal --category money --start
+```
+
+Flow tasks are stored under reusable goals such as `Flow Work: Career` or `Flow Personal: Health`, so category and work/personal context remain visible in focus and review. Use `--commit` if the task should also become one of today's planned commitments.
+
+In flow mode, `kairos today` separates carried commitments from tasks captured today.
 
 Clear today's plan and choose new commitments:
 
@@ -323,6 +357,34 @@ Comma-separated task input is also supported:
 kairos goal task add --goal 7 --task "Test samples,write blog,release on GitHub"
 ```
 
+Update task status:
+
+```powershell
+kairos goal task status
+kairos goal task status --task-number 1.2 --status completed
+kairos goal task status --goal 1 --task-number 2 --status on-hold
+kairos task done --task t:30a619
+kairos task hold --task t:30a619 --reason "Waiting for client" --review-date 2026-05-30
+kairos task block --task t:30a619 --reason "Need API access"
+```
+
+Inside the interactive shell, natural aliases also work:
+
+```text
+kairos> update task
+kairos> complete task
+kairos> hold task
+```
+
+Supported task statuses are `todo`, `doing`, `done`, `on-hold`, and `blocked`. `completed` is accepted as an alias for `done`. `kairos goal list` shows both the current display number and a stable `t:xxxxxx` task reference; prefer the stable reference when updating a task after statuses have changed.
+
+Close the day:
+
+```powershell
+kairos shutdown
+kairos shutdown --summary "Finished the release notes" --carry "Waiting on review" --tomorrow "Start with tests"
+```
+
 ## Focus Timer
 
 Start a focus timer for a planned or active task:
@@ -370,6 +432,23 @@ Pick a goal by number without prompts:
 ```powershell
 kairos season create --goal 2 --title "MongoDB exam season" --daily-minimum 45 --weekly-target 420
 ```
+
+Update the current season with a reason:
+
+```powershell
+kairos season update --reason "Exam date moved" --end-date 2026-06-25
+kairos season update --reason "Daily minimum was unrealistic" --daily-minimum 35 --weekly-target 245
+kairos season update --reason "Primary evidence changed" --goal 2 --primary "Validate ESE prep through daily evidence"
+```
+
+Inside the interactive shell:
+
+```text
+kairos> update season
+kairos> edit season
+```
+
+Every update stores a change entry with timestamp, reason, changed fields, and before/after values.
 
 Natural aliases inside the interactive shell:
 

@@ -132,6 +132,8 @@ kairos> focus
 kairos> exit
 ```
 
+On the first interactive open of a new day, Kairos starts with today check-in, saves the daily log, then asks whether you want to pick one to three commitments or go with the flow and record tasks as they happen. The check-in mixes open prompts with rotating choice, rating, ranking, and agree/disagree questions, and each saved answer keeps the question id and timestamp for later comparison.
+
 One-shot commands also work:
 
 ```powershell
@@ -143,11 +145,15 @@ kairos status
 kairos goal create
 kairos goal list
 kairos goal add-task
+kairos goal task status
 kairos today plan
+kairos today flow
+kairos today add --title "Reply to client escalation" --domain work --category career
 kairos focus start
 kairos daily
 kairos today
 kairos season
+kairos season update --reason "Adjust dates after real evidence" --end-date 2026-06-25
 ```
 
 Use local JSON while developing the web app:
@@ -251,7 +257,7 @@ Start from any directory:
 kairos
 ```
 
-The home screen shows the current 21-day season, a daily discipline progress bar, completed minutes as XP, today's selected commitments, completed goals/tasks, and the next focus target.
+The home screen shows the current 21-day season, a daily discipline progress bar, completed minutes as XP, today's selected commitments or flow mode, completed goals/tasks, and fast commands.
 
 Kairos refreshes the configured storage before the command center is drawn. During an interactive session, use `refresh`, `reload`, `sync`, or `home` to reload the latest state without restarting:
 
@@ -265,15 +271,31 @@ Current daily loop:
 kairos daily
 kairos goal create
 kairos goal add-task
+kairos goal task status
+kairos task done --task t:xxxxxx
 kairos goal list
 kairos today plan
+kairos today flow
+kairos today add --title "Book appointment" --domain personal --category health
 kairos focus
 kairos status
+kairos brain sync
+kairos shutdown
 ```
 
-`kairos focus` is an interactive alias for `kairos focus start`. It shows available goals/tasks, runs the timer, saves the session result, and marks completed tasks done. `kairos status` shows storage, season, total focus minutes, completed work grouped by priority/goal/task, and the next target.
+`kairos today plan` creates a deliberate day with one to three commitments. `kairos today flow` keeps the day flexible so `kairos focus` can pick from any available task and record what happened. `kairos goal task status` and the shorter `kairos task done|hold|block` commands let you update tasks by display number or stable `t:xxxxxx` reference from `kairos goal list`. `kairos focus` is an interactive alias for `kairos focus start`. It shows available goals/tasks, runs the timer, saves the session result, and marks completed tasks done.
 
-`kairos daily` shows a small `(⌐■_■) KAIROS` logo and asks three to five questions. Answers are saved as Brain reflections and the daily intention/must-win are written into the daily log.
+The current 21-day season is shown at the top of task/focus choices so at least one protected season block stays visible every day.
+
+During flow mode, use `kairos today add --domain work|personal --category <area>` to capture ad-hoc tasks without losing whether the work was career, health, money, relationships, or another life area.
+
+`kairos shutdown` closes the day with a short summary, carry-forward note, and tomorrow seed.
+
+`kairos daily` shows a small `(⌐■_■) KAIROS` logo and asks three to five questions. Answers are saved as Brain reflections and the daily intention/must-win are written into the daily log. The rotating Brain questions prioritize unanswered high-value sections such as situation simulation, decision rules, stress defaults, communication style, boundaries, constraint preferences, and belief evolution.
+
+Use `kairos brain sync` to write the readable Brain markdown into the vault, including questionnaire history, profile, current state, confirmed memories, and search memory.
+
+Use `kairos brain rebuild` to regenerate the personal-brain layer from raw data. It creates observations and inferred patterns with evidence counts, confidence, recency, and contradiction notes, then `kairos brain sync` writes them into `vault/10 Brain/Personal Brain.md`.
 
 To open Kairos automatically when Windows starts:
 
@@ -285,17 +307,19 @@ kairos setup startup
 
 1. Open `Season` to define the current 21-day operating agreement.
 2. Pick one primary track, one support track, success criteria, constraints, and paused goals.
-3. Use `Apply empty fields` to draft a season from current goals and Brain context.
-4. Use `Update Direction` when the season should refresh North Star and area targets.
-5. Open `Areas` weekly and score Career, Learning, Health, Money, Relationships, and Personal Systems.
-6. Open `Weekly` to set realistic capacity, allocate goals, and handle rollover.
-7. Open `North Star` when longer-term direction feels unclear.
-8. Create goals under the matching life area so daily work connects back to the life you are building.
+3. Use `kairos season update --reason "..."`
+   when dates, daily minimum, linked goal, or season direction changes.
+4. Use `Apply empty fields` to draft a season from current goals and Brain context.
+5. Use `Update Direction` when the season should refresh North Star and area targets.
+6. Open `Areas` weekly and score Career, Learning, Health, Money, Relationships, and Personal Systems.
+7. Open `Weekly` to set realistic capacity, allocate goals, and handle rollover.
+8. Open `North Star` when longer-term direction feels unclear.
+9. Create goals under the matching life area so daily work connects back to the life you are building.
 
 ## Brain And Research
 
 - `Brain` stores editable self-understanding, confirmed memories, memory candidates, saved research, and the question engine.
-- The current question bank has 121 questions: 55 Likert, 44 open, 18 choice, 3 frequency, and 1 ranking.
+- The current question bank has 156 questions: 67 open, 55 Likert, 30 choice, 3 frequency, and 1 ranking. It includes situation simulation, decision rules, stress defaults, communication style, boundaries, constraint preferences, and belief evolution for the personal-brain layer.
 - `Research` is a source-backed search, read, and save flow. Use it like a lightweight Perplexity-style research session, then save only the insight that should affect planning or memory.
 - Brain and Research are memory layers. They should support Today, Season, Weekly, Review, and Coach without becoming a generic note dump.
 

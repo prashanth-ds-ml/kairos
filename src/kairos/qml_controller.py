@@ -55,8 +55,9 @@ def task_status_sort_key(task: Task) -> int:
     return {
         "in_progress": 0,
         "todo": 1,
-        "blocked": 2,
-        "done": 3,
+        "on_hold": 2,
+        "blocked": 3,
+        "done": 4,
     }.get(task.status, 99)
 
 

@@ -52,7 +52,7 @@ The timeboxed day is useful, but it should not dominate Today.
 
 Design direction:
 
-- Today should show the next action first.
+- Today should show the chosen operating mode, selected/captured work, and completed evidence first.
 - The full schedule should be collapsed by default on mobile.
 - Template controls should be secondary.
 - The user should not have to manage 13 blocks before starting one focus block.

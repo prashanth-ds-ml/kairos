@@ -49,7 +49,7 @@ Current risk:
 
 Updated product direction:
 
-- Today defines intended traction and shows one next action.
+- Today defines intended traction through planned mode or flow mode, then records evidence.
 - Focus protects one block with a pact.
 - Activity is a separate mode, not a second form competing with Focus.
 - Weekly defines realistic traction before the week starts.

@@ -7,7 +7,7 @@ Status: living build document
 Current implementation snapshot:
 
 - Season is the active 21-day operating agreement.
-- Brain stores editable profile fields, confirmed memories, memory candidates, saved research, and a 121-question bank.
+- Brain stores editable profile fields, confirmed memories, memory candidates, saved research, raw answers, generated observations, inferred patterns, and a 156-question bank.
 - Research stores source-backed sessions and selected durable insights.
 - Today, Season, Brain, Research, Weekly, Review, Goals, Areas, Focus, North Star, Coach, and mobile Today are covered by Playwright smoke screenshots.
 - The next development surface is CLI-first, using the same storage layer as the web app.
@@ -15,9 +15,9 @@ Current implementation snapshot:
 
 CLI-first snapshot:
 
-- First surface: `kairos` / `kairos home`, the command center for season, daily discipline progress, XP-style completed minutes, done work, and next action.
+- First surface: `kairos` / `kairos home`, the command center for season, daily discipline progress, XP-style completed minutes, done work, selected/captured work, and fast commands.
 - Status command: `kairos status`, to verify storage mode and see completed work grouped by priority, goal, task, and minutes.
-- Core loop: `kairos daily`, `kairos goal create`, `kairos goal add-task`, `kairos today plan`, `kairos focus`, and `kairos status`.
+- Core loop: `kairos daily`, `kairos goal create`, `kairos goal add-task`, `kairos today plan` or `kairos today flow`, `kairos focus`, `kairos shutdown`, `kairos brain rebuild`, and `kairos status`.
 - Timer requirement: terminal countdown, alert at focus end, saved session result, and task status update for completed, partial, or blocked work.
 
 This document defines the evolved Kairos product after the idea shifted from a time-management app into a cognitive mirror plus best-self coach plus execution system.
@@ -811,4 +811,4 @@ This means:
 - Reflection must feed planning.
 - Planning must feed execution.
 - Execution must feed review.
-- The app should always answer the user's implicit question: "What should I do next?"
+- The app should always answer the user's implicit question for the current mode: "What did I choose, what evidence exists, and what needs review?"

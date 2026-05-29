@@ -499,6 +499,7 @@ label { display: grid; gap: 6px; color: #334155; font-size: 12px; font-weight: 7
 .task-row { display: grid; gap: 12px; border-left: 4px solid #dbeafe; }
 .task-row.in_progress { border-left-color: var(--blue); background: #f8fbff; }
 .task-row.done { border-left-color: var(--green); background: var(--green-soft); }
+.task-row.on_hold { border-left-color: #f59e0b; background: #fffbeb; }
 .task-row.blocked { border-left-color: var(--red); background: var(--red-soft); }
 .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 .actions form { margin: 0; }
@@ -583,6 +584,7 @@ label { display: grid; gap: 6px; color: #334155; font-size: 12px; font-weight: 7
 .stacked-bar span { display: block; min-width: 0; }
 .stacked-bar .done, .legend-dot.completed { background: var(--green); }
 .stacked-bar .in_progress, .legend-dot.partial { background: var(--blue); }
+.stacked-bar .on_hold { background: #f59e0b; }
 .stacked-bar .blocked, .legend-dot.blocked { background: var(--red); }
 .stacked-bar .todo { background: #cbd5e1; }
 .stacked-bar .completed { background: var(--green); }

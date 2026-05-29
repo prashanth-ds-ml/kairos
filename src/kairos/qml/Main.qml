@@ -1100,6 +1100,7 @@ ApplicationWindow {
                         spacing: 10
                         AppButton { text: "Start"; enabled: selectedTaskIndex >= 0; onClicked: kairos.updateSelectedTaskStatus(selectedTaskIndex, "in_progress") }
                         AppButton { text: "Done"; primary: true; enabled: selectedTaskIndex >= 0; onClicked: kairos.updateSelectedTaskStatus(selectedTaskIndex, "done") }
+                        AppButton { text: "On hold"; enabled: selectedTaskIndex >= 0; onClicked: kairos.updateSelectedTaskStatus(selectedTaskIndex, "on_hold") }
                         AppButton { text: "Blocked"; enabled: selectedTaskIndex >= 0; onClicked: kairos.updateSelectedTaskStatus(selectedTaskIndex, "blocked") }
                         AppButton { text: "Delete"; enabled: selectedTaskIndex >= 0; onClicked: kairos.deleteSelectedTask(selectedTaskIndex) }
                         Item { Layout.fillWidth: true }

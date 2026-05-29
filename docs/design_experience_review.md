@@ -31,7 +31,7 @@ Current implementation note:
 - Areas now behaves as a scorecard with overview metrics first.
 - Weekly now supports capacity planning, goal allocation, and rollover.
 - Season is now the 21-day operating agreement and should be the main bridge between long-term direction and daily execution.
-- Brain now leads with recommended questions and keeps the full 121-question library collapsed.
+- Brain now leads with recommended questions and keeps the full 156-question library collapsed.
 - Research now supports a source-backed search, read, save flow that feeds Brain memory.
 - Coach uses Hugging Face Inference Providers and `Qwen/Qwen2.5-7B-Instruct-1M`, with local deterministic fallback when the provider is unavailable.
 
@@ -72,7 +72,7 @@ The current product flow is:
 6. Complete a block and record it.
 7. Learn from completed sessions in Review.
 
-This is a strong loop, but it is not yet visible enough to the user. A new user can land on Today and see metrics, a daily log, next focus, queue, and available work, but the app does not clearly say which action matters first.
+This is a strong loop, but it is not yet visible enough to the user. A new user can land on Today and see metrics, a daily log, selected work, flow captures, queue, and available work, but the app must keep the chosen daily operating mode clear.
 
 ## What Works Well
 
@@ -96,7 +96,7 @@ Today shows the Now banner, metrics, checklist, commitments, a long timeboxed da
 
 Recommended change:
 
-Create a stronger top section called "Now" with one primary action. If no tasks are planned, the primary action should be "Plan today". If a task is planned, it should be "Start next focus block". If a focus block was completed, it should shift attention to the next planned item or shutdown.
+Create a stronger top section called "Now" with the user's chosen operating mode. If no mode is chosen, the primary decision is planned day versus flow day. If work is selected, the surface should show selected/captured work and completed evidence without forcing a recommended next item.
 
 New design requirement:
 
@@ -108,7 +108,7 @@ The six metrics occupy a large area before the user sees the actual work. This m
 
 Recommended change:
 
-Keep Score and Streak prominent, but compress the other metrics into a compact weekly progress strip. The top of Today should prioritize next action, not reporting.
+Keep Score and Streak prominent, but compress the other metrics into a compact weekly progress strip. The top of Today should prioritize operating mode and evidence, not reporting.
 
 ### 3. Forms Make the App Feel Heavy
 
@@ -156,7 +156,7 @@ Move mobile navigation to a compact bottom tab bar with Today, Focus, Goals, Rev
 
 ## Today
 
-Current purpose: daily planning, checklist, next focus, available work, and daily reflection.
+Current purpose: daily planning, planned/flow mode, available work, captured work, completed evidence, and daily reflection.
 
 Recommended design direction:
 
@@ -171,7 +171,7 @@ Recommended design direction:
 
 Suggested Today layout:
 
-1. Now: next action, selected task, start button.
+1. Now: daily mode, selected/captured work, evidence summary.
 2. Daily score: score, streak, focus minutes.
 3. Today's commitments: 1-3 tasks.
 4. Daily discipline: intention, must-win, shutdown.
@@ -311,7 +311,7 @@ Weekly planning should prevent fantasy planning. It should help the user choose 
 ## Visual Design Recommendations
 
 - Keep the restrained blue and neutral palette, but add semantic colors for status: green for done, amber for attention, red for blocked/neglected.
-- Reduce large metric cards on Today and increase prominence of the next action.
+- Reduce large metric cards on Today and increase prominence of operating mode, selected/captured work, and evidence.
 - Use icons for repetitive actions like start, complete, remove, review, and edit.
 - Tighten vertical spacing on dense pages like Today and Goals.
 - Use progressive disclosure for editing fields.

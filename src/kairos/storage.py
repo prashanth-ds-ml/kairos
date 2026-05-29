@@ -17,7 +17,7 @@ except ImportError:
     Collection = Any
     PyMongoError = Exception
 
-TASK_STATUSES = {"todo", "in_progress", "done", "blocked"}
+TASK_STATUSES = {"todo", "in_progress", "done", "blocked", "on_hold"}
 DEFAULT_LIFE_AREAS = [
     ("career", "Career", "Become valuable through shipped work and opportunity creation."),
     ("learning", "Learning", "Build durable skills through practice and proof of work."),
@@ -184,6 +184,41 @@ KAIROS_NATIVE_QUESTION_SPECS = [
     ("self_honesty_01", "Self Honesty", "self_honesty", "What are you calling a goal that is currently only a hope?", "open", [], "day_7_review", "goal_conflict", "high"),
     ("self_honesty_02", "Self Honesty", "self_honesty", "What result are you avoiding measuring?", "open", [], "day_14_review", "struggles", "high"),
     ("self_honesty_03", "Self Honesty", "self_honesty", "What would an honest week look like if it was smaller but real?", "open", [], "weekly_planning", "planning_pattern", "high"),
+    ("situation_sim_01", "Situation Simulation", "situation_simulation", "If you have 30 minutes, low energy, and an unclear task, what do you usually do?", "choice", ["Reduce scope", "Switch tasks", "Delay", "Ask for clarity", "Push anyway", "Drift"], "daily_checkin", "situation_response", "high"),
+    ("situation_sim_02", "Situation Simulation", "situation_simulation", "When someone interrupts deep work, what is your default reaction?", "choice", ["Stop immediately", "Negotiate time", "Get irritated", "Lose momentum", "Handle it calmly", "Avoid returning"], "focus_complete", "situation_response", "high"),
+    ("situation_sim_03", "Situation Simulation", "situation_simulation", "When a task becomes emotionally heavy, what do you avoid first?", "choice", ["Starting", "Finishing", "Asking for help", "Showing work", "Measuring progress", "Deciding"], "missed_plan", "avoidance_pattern", "high"),
+    ("situation_sim_04", "Situation Simulation", "situation_simulation", "Imagine tomorrow starts badly: low sleep, unexpected work, and one important commitment. What would you realistically protect?", "open", [], "daily_checkin", "situation_response", "high"),
+    ("situation_sim_05", "Situation Simulation", "situation_simulation", "When you get a free unscheduled hour, what do you naturally do before remembering your plan?", "open", [], "weekly_review", "default_behavior", "medium"),
+    ("decision_rule_01", "Decision Rules", "decision_rule", "When do you choose speed over quality?", "open", [], "weekly_review", "decision_rule", "high"),
+    ("decision_rule_02", "Decision Rules", "decision_rule", "What makes you say yes when you should say no?", "open", [], "weekly_review", "boundary_pattern", "high"),
+    ("decision_rule_03", "Decision Rules", "decision_rule", "What evidence is enough for you to act instead of researching more?", "open", [], "research_save", "decision_rule", "high"),
+    ("decision_rule_04", "Decision Rules", "decision_rule", "When two goals compete, what rule should decide which one wins today?", "open", [], "today_setup", "decision_rule", "high"),
+    ("decision_rule_05", "Decision Rules", "decision_rule", "Under uncertainty, which default is most like you?", "choice", ["Research more", "Run a small test", "Ask someone", "Wait", "Choose the safer option", "Choose the higher-upside option"], "daily_checkin", "decision_style", "medium"),
+    ("stress_default_01", "Stress Defaults", "stress_default", "Under pressure, what do you usually do first?", "choice", ["Over-plan", "Escape", "Ask for help", "Work harder", "Freeze", "Switch to easy work"], "missed_plan", "stress_response", "high"),
+    ("stress_default_02", "Stress Defaults", "stress_default", "What kind of pressure makes you make bad decisions?", "open", [], "weekly_review", "stress_response", "high"),
+    ("stress_default_03", "Stress Defaults", "stress_default", "When you feel behind, what story do you tell yourself?", "open", [], "daily_checkin", "self_talk", "high"),
+    ("stress_default_04", "Stress Defaults", "stress_default", "When work piles up, do you become more controlling, avoidant, reactive, or focused?", "choice", ["Controlling", "Avoidant", "Reactive", "Focused", "Numb", "It varies"], "weekly_review", "stress_response", "medium"),
+    ("stress_default_05", "Stress Defaults", "stress_default", "What support helps you recover fastest after a stressful day?", "open", [], "shutdown", "recovery_rule", "medium"),
+    ("communication_01", "Communication Style", "communication_style", "How do you naturally explain hard truths?", "choice", ["Directly", "Carefully", "With examples", "Softly", "Analytically", "I avoid it"], "brain_profile", "voice_style", "medium"),
+    ("communication_02", "Communication Style", "communication_style", "What tone feels most like you when giving advice to yourself?", "choice", ["Direct", "Warm", "Analytical", "Quiet", "Challenging", "Practical"], "brain_profile", "voice_style", "high"),
+    ("communication_03", "Communication Style", "communication_style", "Write advice to your future self in your own voice.", "open", [], "brain_profile", "voice_sample", "high"),
+    ("communication_04", "Communication Style", "communication_style", "When you disagree with someone, what do you usually do?", "choice", ["Confront", "Delay", "Soften", "Avoid", "Ask questions", "Over-explain"], "weekly_review", "social_pattern", "medium"),
+    ("communication_05", "Communication Style", "communication_style", "What phrase sounds like something you would actually say when you need to reset?", "open", [], "daily_checkin", "voice_sample", "medium"),
+    ("boundary_01", "Boundaries", "boundary", "What would you never compromise for success?", "open", [], "brain_profile", "boundary", "high"),
+    ("boundary_02", "Boundaries", "boundary", "What kind of shortcut would feel wrong even if it worked?", "open", [], "brain_profile", "boundary", "high"),
+    ("boundary_03", "Boundaries", "boundary", "Who or what changes your priorities too easily?", "open", [], "weekly_review", "boundary_pattern", "high"),
+    ("boundary_04", "Boundaries", "boundary", "What request should usually be a no during this season?", "open", [], "season_setup", "boundary", "high"),
+    ("boundary_05", "Boundaries", "boundary", "When your boundary is tested, what do you usually protect first?", "choice", ["Peace", "Relationship", "Time", "Image", "Money", "Freedom"], "weekly_review", "boundary_pattern", "medium"),
+    ("constraint_pref_01", "Preference Under Constraint", "constraint_preference", "When time is short, what is your default move?", "choice", ["Reduce scope", "Delay", "Rush", "Switch tasks", "Ask for help", "Drop quality"], "daily_checkin", "constraint_response", "high"),
+    ("constraint_pref_02", "Preference Under Constraint", "constraint_preference", "When energy is low, what kind of task still works for you?", "choice", ["Admin", "Review", "Writing", "Coding", "Reading", "Planning", "Nothing reliable"], "daily_checkin", "energy_rule", "high"),
+    ("constraint_pref_03", "Preference Under Constraint", "constraint_preference", "When a task is vague, what first step makes it usable?", "open", [], "today_setup", "clarity_rule", "high"),
+    ("constraint_pref_04", "Preference Under Constraint", "constraint_preference", "When you have too many tasks, what sorting rule actually helps?", "open", [], "weekly_planning", "decision_rule", "high"),
+    ("constraint_pref_05", "Preference Under Constraint", "constraint_preference", "When you cannot finish, what makes a partial session still feel honest?", "open", [], "focus_complete", "success_criteria", "medium"),
+    ("evolution_01", "Belief Evolution", "belief_evolution", "What did you believe last month that no longer feels true?", "open", [], "monthly_review", "belief_update", "high"),
+    ("evolution_02", "Belief Evolution", "belief_evolution", "Where are your actions disagreeing with your stated values?", "open", [], "weekly_review", "contradiction", "high"),
+    ("evolution_03", "Belief Evolution", "belief_evolution", "What pattern should Kairos stop assuming about you?", "open", [], "brain_review", "model_correction", "high"),
+    ("evolution_04", "Belief Evolution", "belief_evolution", "What recent behavior surprised you?", "open", [], "weekly_review", "behavior_change", "medium"),
+    ("evolution_05", "Belief Evolution", "belief_evolution", "Which old goal no longer fits the person you are becoming?", "open", [], "season_review", "goal_conflict", "medium"),
 ]
 
 def kairos_question(
@@ -325,6 +360,9 @@ class Task:
     status: str = "todo"
     estimate_minutes: int | None = None
     created_at: str = field(default_factory=timestamp)
+    updated_at: str = field(default_factory=timestamp)
+    status_reason: str = ""
+    review_date: str = ""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Task":
@@ -334,6 +372,9 @@ class Task:
             status=data.get("status", "todo"),
             estimate_minutes=data.get("estimate_minutes"),
             created_at=data.get("created_at", timestamp()),
+            updated_at=data.get("updated_at", data.get("created_at", timestamp())),
+            status_reason=data.get("status_reason", ""),
+            review_date=data.get("review_date", ""),
         )
 
 
@@ -499,6 +540,7 @@ class TodayPlan:
     plan_date: str
     day_start: str = "09:00"
     day_end: str = "18:00"
+    mode: str = "unset"
     items: list[TodayPlanItem] = field(default_factory=list)
     blocks: list[TodayBlock] = field(default_factory=list)
 
@@ -508,6 +550,7 @@ class TodayPlan:
             plan_date=data.get("plan_date", datetime.now().date().isoformat()),
             day_start=data.get("day_start", "09:00"),
             day_end=data.get("day_end", "18:00"),
+            mode=data.get("mode", "unset"),
             items=[TodayPlanItem.from_dict(item) for item in data.get("items", [])],
             blocks=[TodayBlock.from_dict(item) for item in data.get("blocks", [])],
         )
@@ -601,6 +644,7 @@ class CurrentSeason:
     day_21_review: str = ""
     final_decision: str = ""
     status: str = "active"
+    change_log: list[dict[str, Any]] = field(default_factory=list)
     created_at: str = field(default_factory=timestamp)
     updated_at: str = field(default_factory=timestamp)
 
@@ -624,6 +668,7 @@ class CurrentSeason:
             day_21_review=data.get("day_21_review", ""),
             final_decision=data.get("final_decision", ""),
             status=data.get("status", "active"),
+            change_log=list(data.get("change_log", [])),
             created_at=data.get("created_at", timestamp()),
             updated_at=data.get("updated_at", timestamp()),
         )
@@ -730,6 +775,62 @@ class BrainMemory:
 
 
 @dataclass
+class BrainObservation:
+    id: str
+    statement: str
+    situation: str = "general"
+    signal_type: str = "reflection"
+    source_type: str = ""
+    source_id: str = ""
+    confidence: float = 0.35
+    created_at: str = field(default_factory=timestamp)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "BrainObservation":
+        return cls(
+            id=data.get("id", f"observation-{uuid4().hex[:8]}"),
+            statement=data.get("statement", ""),
+            situation=data.get("situation", "general"),
+            signal_type=data.get("signal_type", "reflection"),
+            source_type=data.get("source_type", ""),
+            source_id=data.get("source_id", ""),
+            confidence=float(data.get("confidence", 0.35) or 0.35),
+            created_at=data.get("created_at", timestamp()),
+        )
+
+
+@dataclass
+class BrainPattern:
+    id: str
+    statement: str
+    situation: str = "general"
+    pattern_type: str = "preference"
+    confidence: float = 0.4
+    evidence_count: int = 1
+    source_ids: list[str] = field(default_factory=list)
+    contradictions: list[str] = field(default_factory=list)
+    first_seen: str = field(default_factory=timestamp)
+    last_seen: str = field(default_factory=timestamp)
+    updated_at: str = field(default_factory=timestamp)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "BrainPattern":
+        return cls(
+            id=data.get("id", f"pattern-{uuid4().hex[:8]}"),
+            statement=data.get("statement", ""),
+            situation=data.get("situation", "general"),
+            pattern_type=data.get("pattern_type", "preference"),
+            confidence=float(data.get("confidence", 0.4) or 0.4),
+            evidence_count=int(data.get("evidence_count", 1) or 1),
+            source_ids=list(data.get("source_ids", [])),
+            contradictions=list(data.get("contradictions", [])),
+            first_seen=data.get("first_seen", timestamp()),
+            last_seen=data.get("last_seen", timestamp()),
+            updated_at=data.get("updated_at", timestamp()),
+        )
+
+
+@dataclass
 class SearchMemoryItem:
     id: str
     query: str
@@ -810,6 +911,8 @@ class JsonStore:
         self.brain_profile_path = data_dir / "brain_profile.json"
         self.brain_answers_path = data_dir / "brain_answers.json"
         self.brain_memories_path = data_dir / "brain_memories.json"
+        self.brain_observations_path = data_dir / "brain_observations.json"
+        self.brain_patterns_path = data_dir / "brain_patterns.json"
         self.search_memory_path = data_dir / "search_memory.json"
         self.research_sessions_path = data_dir / "research_sessions.json"
         self.vault_dir = Path(os.environ.get("KAIROS_VAULT_DIR", Path(__file__).resolve().parents[2] / "vault"))
@@ -843,6 +946,10 @@ class JsonStore:
             self._write_json(self.brain_answers_path, [])
         if not self.brain_memories_path.exists():
             self._write_json(self.brain_memories_path, [])
+        if not self.brain_observations_path.exists():
+            self._write_json(self.brain_observations_path, [])
+        if not self.brain_patterns_path.exists():
+            self._write_json(self.brain_patterns_path, [])
         if not self.search_memory_path.exists():
             self._write_json(self.search_memory_path, [])
         if not self.research_sessions_path.exists():
@@ -1019,6 +1126,27 @@ class JsonStore:
     def save_brain_memories(self, memories: list[BrainMemory]) -> None:
         self._write_json(self.brain_memories_path, [asdict(memory) for memory in memories])
 
+    def load_brain_observations(self) -> list[BrainObservation]:
+        payload = self._read_json(self.brain_observations_path, [])
+        return [BrainObservation.from_dict(item) for item in payload]
+
+    def save_brain_observations(self, observations: list[BrainObservation]) -> None:
+        self._write_json(self.brain_observations_path, [asdict(observation) for observation in observations])
+
+    def load_brain_patterns(self) -> list[BrainPattern]:
+        payload = self._read_json(self.brain_patterns_path, [])
+        return [BrainPattern.from_dict(item) for item in payload]
+
+    def save_brain_patterns(self, patterns: list[BrainPattern]) -> None:
+        self._write_json(self.brain_patterns_path, [asdict(pattern) for pattern in patterns])
+
+    def rebuild_personal_brain(self) -> tuple[list[BrainObservation], list[BrainPattern]]:
+        observations = build_brain_observations(self.load_brain_answers(), self.load_sessions(), self.load_daily_logs())
+        patterns = build_brain_patterns(observations, self.load_brain_answers(), self.load_sessions())
+        self.save_brain_observations(observations)
+        self.save_brain_patterns(patterns)
+        return observations, patterns
+
     def add_brain_memory(
         self,
         statement: str,
@@ -1063,12 +1191,14 @@ class JsonStore:
         construct: str = "reflection",
         section: str = "Triggered reflection",
         source: str = "Kairos question engine",
+        question_id: str = "triggered_reflection",
+        response_type: str = "open",
     ) -> BrainAnswer:
         answer = BrainAnswer(
             id=f"answer-{uuid4().hex[:8]}",
-            question_id="triggered_reflection",
+            question_id=question_id.strip() or "triggered_reflection",
             prompt=prompt.strip() or "Triggered reflection",
-            response_type="open",
+            response_type=response_type.strip() or "open",
             answer=answer_text.strip(),
             construct=construct.strip() or "reflection",
             section=section.strip() or "Triggered reflection",
@@ -1181,6 +1311,7 @@ class JsonStore:
         profile = self.load_brain_profile()
         answers = self.load_brain_answers()
         memories = self.load_brain_memories()
+        observations, patterns = self.rebuild_personal_brain()
         searches = self.load_search_memory()
         season = self.load_current_season()
         brain_dir = self.vault_dir / "10 Brain"
@@ -1193,6 +1324,7 @@ class JsonStore:
         (brain_dir / "Current State.md").write_text(render_current_state_markdown(profile, areas), encoding="utf-8")
         (brain_dir / "Questionnaire History.md").write_text(render_answers_markdown(answers), encoding="utf-8")
         (brain_dir / "Confirmed Memories.md").write_text(render_brain_memories_markdown(memories), encoding="utf-8")
+        (brain_dir / "Personal Brain.md").write_text(render_personal_brain_markdown(patterns, observations), encoding="utf-8")
         (research_dir / "Search Memory.md").write_text(render_search_memory_markdown(searches), encoding="utf-8")
 
     def update_life_area(
@@ -1450,7 +1582,14 @@ class JsonStore:
             raise ValueError(f"Goal not found: {goal_id}")
         self.save_goals(updated_goals)
 
-    def update_task_status(self, goal_id: str, task_id: str, status: str) -> None:
+    def update_task_status(
+        self,
+        goal_id: str,
+        task_id: str,
+        status: str,
+        reason: str = "",
+        review_date: str = "",
+    ) -> None:
         if status not in TASK_STATUSES:
             raise ValueError(f"Invalid task status: {status}")
         goals = self.load_goals()
@@ -1460,6 +1599,15 @@ class JsonStore:
             for task in goal.tasks:
                 if task.id == task_id:
                     task.status = status
+                    task.updated_at = timestamp()
+                    if reason:
+                        task.status_reason = reason
+                    if review_date:
+                        task.review_date = review_date
+                    if status in {"todo", "in_progress", "done"} and not reason:
+                        task.status_reason = ""
+                    if status in {"todo", "in_progress", "done"} and not review_date:
+                        task.review_date = ""
                     self.save_goals(goals)
                     return
             raise ValueError(f"Task not found: {task_id}")
@@ -1561,6 +1709,8 @@ class MongoStore(JsonStore):
         )
         self.collection.update_one({"_id": "brain_answers"}, {"$setOnInsert": {"data": []}}, upsert=True)
         self.collection.update_one({"_id": "brain_memories"}, {"$setOnInsert": {"data": []}}, upsert=True)
+        self.collection.update_one({"_id": "brain_observations"}, {"$setOnInsert": {"data": []}}, upsert=True)
+        self.collection.update_one({"_id": "brain_patterns"}, {"$setOnInsert": {"data": []}}, upsert=True)
         self.collection.update_one({"_id": "search_memory"}, {"$setOnInsert": {"data": []}}, upsert=True)
         self.collection.update_one({"_id": "research_sessions"}, {"$setOnInsert": {"data": []}}, upsert=True)
 
@@ -1687,6 +1837,20 @@ class MongoStore(JsonStore):
     def save_brain_memories(self, memories: list[BrainMemory]) -> None:
         self._write_document("brain_memories", [asdict(memory) for memory in memories])
 
+    def load_brain_observations(self) -> list[BrainObservation]:
+        payload = self._read_document("brain_observations", [])
+        return [BrainObservation.from_dict(item) for item in payload]
+
+    def save_brain_observations(self, observations: list[BrainObservation]) -> None:
+        self._write_document("brain_observations", [asdict(observation) for observation in observations])
+
+    def load_brain_patterns(self) -> list[BrainPattern]:
+        payload = self._read_document("brain_patterns", [])
+        return [BrainPattern.from_dict(item) for item in payload]
+
+    def save_brain_patterns(self, patterns: list[BrainPattern]) -> None:
+        self._write_document("brain_patterns", [asdict(pattern) for pattern in patterns])
+
     def load_search_memory(self) -> list[SearchMemoryItem]:
         payload = self._read_document("search_memory", [])
         return [SearchMemoryItem.from_dict(item) for item in payload]
@@ -1795,6 +1959,14 @@ def seed_mongo_from_json(mongo_store: MongoStore, json_store: JsonStore) -> None
     if local_memories and not mongo_store.load_brain_memories():
         mongo_store.save_brain_memories(local_memories)
 
+    local_observations = json_store.load_brain_observations()
+    if local_observations and not mongo_store.load_brain_observations():
+        mongo_store.save_brain_observations(local_observations)
+
+    local_patterns = json_store.load_brain_patterns()
+    if local_patterns and not mongo_store.load_brain_patterns():
+        mongo_store.save_brain_patterns(local_patterns)
+
     local_searches = json_store.load_search_memory()
     if local_searches and not mongo_store.load_search_memory():
         mongo_store.save_search_memory(local_searches)
@@ -1832,6 +2004,210 @@ def brain_profile_is_empty(profile: BrainProfile) -> bool:
             profile.motivation_notes.strip(),
         ]
     )
+
+
+def build_brain_observations(
+    answers: list[BrainAnswer],
+    sessions: list[FocusSession],
+    logs: list[DailyLog],
+) -> list[BrainObservation]:
+    observations: list[BrainObservation] = []
+    seen: set[str] = set()
+    for answer in answers:
+        if not answer.answer.strip():
+            continue
+        statement = f"In {situation_for_answer(answer)}, user reported: {answer.answer.strip()}"
+        key = f"answer:{answer.id}"
+        if key in seen:
+            continue
+        seen.add(key)
+        observations.append(
+            BrainObservation(
+                id=f"observation-{stable_hex(key)}",
+                statement=statement,
+                situation=situation_for_answer(answer),
+                signal_type=signal_type_for_construct(answer.construct),
+                source_type="answer",
+                source_id=answer.id,
+                confidence=0.45 if answer.response_type != "open" else 0.35,
+                created_at=answer.created_at,
+            )
+        )
+    for session in sessions:
+        if session.status not in {"completed", "partial", "blocked"}:
+            continue
+        minutes = session.duration_seconds // 60
+        statement = f"During focus execution, user logged {minutes} min as {session.status}."
+        if session.notes.strip():
+            statement += f" Notes: {session.notes.strip()}"
+        key = f"session:{session.id}"
+        observations.append(
+            BrainObservation(
+                id=f"observation-{stable_hex(key)}",
+                statement=statement,
+                situation="focus_execution",
+                signal_type="behavior",
+                source_type="session",
+                source_id=session.id,
+                confidence=0.55,
+                created_at=session.started_at,
+            )
+        )
+    for log in logs:
+        if log.pact.strip():
+            key = f"log-friction:{log.log_date}"
+            observations.append(
+                BrainObservation(
+                    id=f"observation-{stable_hex(key)}",
+                    statement=f"On {log.log_date}, user expected this derailment: {log.pact.strip()}",
+                    situation="daily_planning",
+                    signal_type="friction",
+                    source_type="daily_log",
+                    source_id=log.log_date,
+                    confidence=0.4,
+                    created_at=log.updated_at,
+                )
+            )
+    return sorted(observations, key=lambda item: item.created_at)
+
+
+def build_brain_patterns(
+    observations: list[BrainObservation],
+    answers: list[BrainAnswer],
+    sessions: list[FocusSession],
+) -> list[BrainPattern]:
+    patterns: list[BrainPattern] = []
+    grouped_answers: dict[str, list[BrainAnswer]] = {}
+    for answer in answers:
+        if answer.answer.strip():
+            grouped_answers.setdefault(answer.question_id or answer.construct or "reflection", []).append(answer)
+    for question_id, items in grouped_answers.items():
+        if len(items) < 2:
+            continue
+        items = sorted(items, key=lambda item: item.created_at)
+        latest = items[-1]
+        first = items[0]
+        confidence = min(0.85, 0.35 + (0.08 * len(items)))
+        patterns.append(
+            BrainPattern(
+                id=f"pattern-{stable_hex('question:' + question_id)}",
+                statement=f"Repeated signal for '{latest.prompt}': latest answer is '{latest.answer.strip()}'.",
+                situation=situation_for_answer(latest),
+                pattern_type=signal_type_for_construct(latest.construct),
+                confidence=confidence,
+                evidence_count=len(items),
+                source_ids=[item.id for item in items],
+                contradictions=answer_contradictions(items),
+                first_seen=first.created_at,
+                last_seen=latest.created_at,
+            )
+        )
+    for situation in sorted({item.situation for item in observations}):
+        items = [item for item in observations if item.situation == situation]
+        if len(items) < 2:
+            continue
+        confidence = min(0.8, 0.3 + 0.06 * len(items))
+        patterns.append(
+            BrainPattern(
+                id=f"pattern-{stable_hex('situation:' + situation)}",
+                statement=f"User has {len(items)} recorded signals around {situation.replace('_', ' ')}.",
+                situation=situation,
+                pattern_type="situation_pattern",
+                confidence=confidence,
+                evidence_count=len(items),
+                source_ids=[item.source_id for item in items if item.source_id],
+                first_seen=min(item.created_at for item in items),
+                last_seen=max(item.created_at for item in items),
+            )
+        )
+    if sessions:
+        completed = [session for session in sessions if session.status == "completed"]
+        blocked = [session for session in sessions if session.status == "blocked"]
+        completion_rate = round((len(completed) / len(sessions)) * 100)
+        statement = f"Focus behavior: {completion_rate}% of logged focus sessions are completed."
+        if blocked:
+            statement += f" {len(blocked)} blocked session(s) are recorded."
+        patterns.append(
+            BrainPattern(
+                id=f"pattern-{stable_hex('focus-completion')}",
+                statement=statement,
+                situation="focus_execution",
+                pattern_type="behavior",
+                confidence=min(0.85, 0.35 + 0.04 * len(sessions)),
+                evidence_count=len(sessions),
+                source_ids=[session.id for session in sessions],
+                first_seen=min(session.started_at for session in sessions),
+                last_seen=max(session.started_at for session in sessions),
+            )
+        )
+    return sorted(patterns, key=lambda item: (item.situation, item.pattern_type, item.last_seen))
+
+
+def stable_hex(value: str) -> str:
+    import hashlib
+
+    return hashlib.sha1(value.encode("utf-8")).hexdigest()[:10]
+
+
+def situation_for_answer(answer: BrainAnswer) -> str:
+    text = " ".join([answer.construct, answer.section, answer.prompt]).lower()
+    if "season" in text:
+        return "season_commitment"
+    if "energy" in text or "mood" in text or "wellbeing" in text:
+        return "state_energy"
+    if "trigger" in text or "derail" in text or "friction" in text or "struggle" in text:
+        return "distraction_friction"
+    if "planning" in text or "must-win" in text or "minimum" in text:
+        return "daily_planning"
+    if "identity" in text or "values" in text:
+        return "identity_values"
+    if "autonomy" in text or "competence" in text or "motivation" in text:
+        return "motivation"
+    if "situation" in text or "constraint" in text:
+        return "situation_response"
+    if "decision" in text or "uncertainty" in text:
+        return "decision_policy"
+    if "stress" in text or "pressure" in text:
+        return "stress_response"
+    if "communication" in text or "voice" in text or "disagree" in text:
+        return "communication_style"
+    if "boundary" in text or "compromise" in text:
+        return "boundaries"
+    if "evolution" in text or "contradiction" in text or "no longer" in text:
+        return "belief_evolution"
+    return "general_reflection"
+
+
+def signal_type_for_construct(construct: str) -> str:
+    normalized = construct.strip().lower()
+    if normalized in {"identity", "values", "anti_vision"}:
+        return "belief"
+    if normalized in {"energy", "wellbeing", "emotion"}:
+        return "state"
+    if "trigger" in normalized or "friction" in normalized or normalized == "struggle":
+        return "friction"
+    if normalized in {"autonomy", "competence", "relatedness", "motivation"}:
+        return "preference"
+    if normalized in {"situation_simulation", "constraint_preference"}:
+        return "situation_response"
+    if normalized in {"decision_rule", "decision_style"}:
+        return "decision_rule"
+    if normalized == "stress_default":
+        return "stress_response"
+    if normalized == "communication_style":
+        return "voice"
+    if normalized == "boundary":
+        return "boundary"
+    if normalized == "belief_evolution":
+        return "belief_update"
+    return "reflection"
+
+
+def answer_contradictions(answers: list[BrainAnswer]) -> list[str]:
+    values = {answer.answer.strip().lower() for answer in answers if answer.answer.strip()}
+    if len(values) <= 1:
+        return []
+    return ["Answers changed over time; treat this as state-dependent until confirmed."]
 
 
 def markdown_list(items: list[str]) -> str:
@@ -2028,6 +2404,44 @@ type: kairos-confirmed-memories
 # Confirmed Memories
 
 {body}
+"""
+
+
+def render_personal_brain_markdown(patterns: list[BrainPattern], observations: list[BrainObservation]) -> str:
+    pattern_rows = []
+    for pattern in sorted(patterns, key=lambda item: (item.situation, -item.confidence, item.last_seen)):
+        contradictions = f"\n  - Contradictions: {'; '.join(pattern.contradictions)}" if pattern.contradictions else ""
+        pattern_rows.append(
+            f"## {pattern.situation} - {pattern.pattern_type}\n"
+            f"- Pattern: {pattern.statement}\n"
+            f"- Confidence: {pattern.confidence:.2f}\n"
+            f"- Evidence count: {pattern.evidence_count}\n"
+            f"- First seen: {pattern.first_seen}\n"
+            f"- Last seen: {pattern.last_seen}{contradictions}\n"
+        )
+    observation_rows = []
+    for observation in sorted(observations, key=lambda item: item.created_at, reverse=True)[:50]:
+        observation_rows.append(
+            f"- {observation.created_at} [{observation.situation} / {observation.signal_type} / {observation.confidence:.2f}] "
+            f"{observation.statement}"
+        )
+    patterns_body = "\n".join(pattern_rows) if pattern_rows else "No inferred patterns yet. Answer more questions and log more focus sessions.\n"
+    observations_body = "\n".join(observation_rows) if observation_rows else "No observations yet.\n"
+    return f"""---
+type: kairos-personal-brain
+---
+
+# Personal Brain
+
+This file is generated from raw Kairos answers, focus sessions, and daily logs. Raw data remains the source of truth.
+
+## Inferred Patterns
+
+{patterns_body}
+
+## Recent Observations
+
+{observations_body}
 """
 
 

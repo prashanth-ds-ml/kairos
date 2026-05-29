@@ -28,7 +28,7 @@ This folder documents the current product direction for Kairos. The docs should 
 | Review | Learning surface for planned vs actual, friction, area balance, and next adjustment. |
 | North Star | Read-first long-term direction: identity, values, anti-vision, yearly direction, and priorities. |
 | Areas | Life and career balance scorecard. |
-| Goals | Outcomes and next actions, not a generic task dump. |
+| Goals | Outcomes and concrete tasks, not a generic task dump. |
 | Brain | Editable cognitive mirror: profile, confirmed memories, memory candidates, saved research, and question engine. |
 | Research | Source-backed search, read, and save workflow that feeds Brain memory. |
 | Coach | Contextual assistant that suggests, never judges or commands. |
@@ -59,7 +59,7 @@ Use `Review` in product language. The technical route may still be `/history` un
 2. Goals turn direction into outcomes.
 3. Season chooses the protected 21-day primary track, support track, constraints, and paused goals.
 4. Weekly turns the season into realistic capacity commitments.
-5. Today turns the week into one next action.
+5. Today turns the week into a deliberate daily operating mode.
 6. Focus turns the action into timed execution.
 7. Brain and Research capture durable patterns and source-backed insights.
 8. Review turns evidence into the next adjustment.
@@ -70,15 +70,23 @@ The CLI is now the active daily operating surface. It writes to the same storage
 
 | Command | Purpose |
 | --- | --- |
-| `kairos` / `kairos home` | Open the command center with season, discipline progress, XP, completed work, and next action. |
-| `kairos status` | Confirm storage mode, current season, today's commitments, focus minutes, completed work, and next action. |
+| `kairos` / `kairos home` | Open the command center with season, discipline progress, XP, completed work, and fast commands. |
+| `kairos status` | Confirm storage mode, current season, today's commitments, focus minutes, and completed work. |
 | `kairos season` | Create or update the current 21-day operating agreement. |
-| `kairos today` | Show the current day, commitments, and next focus target. |
+| `kairos season update --reason "..."` | Change season dates, goal, targets, or direction while recording why the season changed. |
+| `kairos today` | Show the current day, commitments, and captured flow tasks. |
 | `kairos today plan` | Choose 1-3 commitments from active goal tasks. |
+| `kairos today flow` | Keep the day flexible and record focus blocks against any available task. |
+| `kairos today add` | Capture an ad-hoc work or personal flow task with category/area metadata. |
 | `kairos goal create` | Create goals with priority, category, target date, notes, and first tasks. |
 | `kairos goal add-task` / `add task` | Add tasks to an existing goal whenever the goal needs more concrete next steps. |
+| `kairos goal task status` / `update task` | Pick a task and set it to todo, doing, done, on hold, or blocked. |
+| `kairos task done --task t:xxxxxx` | Update a task by stable task reference from `kairos goal list`. |
 | `kairos focus` / `kairos focus start` | Run a terminal timer, save the result, and update task status when completed, partial, or blocked. |
 | `kairos daily` | Ask daily reflection questions and save useful answers to Brain. |
+| `kairos brain sync` | Write Brain profile, questionnaire history, memories, and research memory into the markdown vault. |
+| `kairos brain rebuild` | Regenerate observations and inferred user patterns from raw answers, logs, and focus sessions. |
+| `kairos shutdown` | Close the day, record carry-forward context, and seed tomorrow's first move. |
 
 Research, Coach, and full Review CLI commands should come after this daily loop stays reliable in real use.
 

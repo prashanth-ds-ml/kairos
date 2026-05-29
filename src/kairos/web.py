@@ -29,6 +29,7 @@ TASK_STATUS_LABELS = {
     "todo": "Todo",
     "in_progress": "Doing",
     "done": "Done",
+    "on_hold": "On hold",
     "blocked": "Blocked",
 }
 BLOCK_KINDS = {
@@ -866,7 +867,7 @@ def sorted_goals(goals: list[Goal]) -> list[Goal]:
 
 
 def sorted_tasks(tasks: list[Task]) -> list[Task]:
-    order = {"in_progress": 0, "todo": 1, "blocked": 2, "done": 3}
+    order = {"in_progress": 0, "todo": 1, "on_hold": 2, "blocked": 3, "done": 4}
     return sorted(tasks, key=lambda task: (order.get(task.status, 99), task.created_at))
 
 
@@ -1215,16 +1216,12 @@ def now_panel(
         action = "<form method='post' action='/today/auto-plan'><button class='primary'>Auto-plan today</button></form>"
     else:
         action = f"<a class='button primary' href='{escape(href)}'>{escape(state['action'])}</a>"
-    next_line = ""
-    if next_item is not None:
-        next_line = f"<p><strong>Next:</strong> {escape(str(next_item['title']))}</p>"
     return f"""
 <section class="now-panel {escape(state['tone'])}">
   <div>
     <span>{escape(state['label'])}</span>
     <h3>{escape(state['title'])}</h3>
     <p>{escape(state['body'])}</p>
-    {next_line}
   </div>
   <div class="now-action">{action}</div>
 </section>"""
@@ -1719,7 +1716,7 @@ def render_goal_details(goal: Goal | None) -> str:
     tasks = "".join(task_row(goal, task) for task in sorted_tasks(goal.tasks)) or "<p class='muted'>No tasks yet.</p>"
     next_task_warning = "" if next_task else f"""
 <section class="goal-warning">
-  <strong>This goal needs one visible next action.</strong>
+  <strong>This goal needs one visible task.</strong>
   <p>Without a task, Kairos cannot plan it into Today, Weekly allocation, or Focus cleanly.</p>
 </section>"""
     return f"""
@@ -1737,8 +1734,8 @@ def render_goal_details(goal: Goal | None) -> str:
 </div>
 <div class="progress goal-progress-bar"><span style="width:{progress}%"></span></div>
 <section class="goal-next">
-  <span>Next action</span>
-  <h4>{escape(next_task.title if next_task else 'Add a concrete next task')}</h4>
+  <span>Open task</span>
+  <h4>{escape(next_task.title if next_task else 'Add a concrete task')}</h4>
   <p>{escape(goal.notes or 'No notes yet. Add the reason, deliverable, or proof of work expected from this goal.')}</p>
 </section>
 {next_task_warning}
@@ -1949,7 +1946,7 @@ def goal_track_text(goal: Goal | None, fallback: str) -> str:
     if goal is None:
         return fallback
     next_task = next((task for task in sorted_tasks(goal.tasks) if task.status in {"in_progress", "todo", "blocked"}), None)
-    task_text = f" Next action: {next_task.title}." if next_task else " Add one concrete next task."
+    task_text = f" Open task: {next_task.title}." if next_task else " Add one concrete task."
     return f"{goal.title}.{task_text}"
 
 
@@ -2526,7 +2523,7 @@ def review_decisions(
         items.append(("Plan the next day", "No daily intention or must-win is recorded this week.", "/", "Plan"))
     no_task_goal = next((goal for goal in sorted_goals(goals.values()) if goal.status == "active" and not goal.tasks), None)
     if no_task_goal:
-        items.append((f"Give {no_task_goal.title} a next task", "A goal without a next action cannot become a focus block.", f"/goals?selected={no_task_goal.id}", "Fix goal"))
+        items.append((f"Give {no_task_goal.title} a task", "A goal without a concrete task cannot become a focus block.", f"/goals?selected={no_task_goal.id}", "Fix goal"))
     untargeted = next((area for area in areas if area.weekly_target_minutes <= 0), None)
     if untargeted:
         items.append((f"Set a target for {untargeted.name}", "Review cannot judge balance until this area has a weekly time budget.", "/areas", "Set target"))
@@ -2691,7 +2688,7 @@ def goal_progress_chart(goals: list[Goal]) -> str:
 <div class="goal-chart-row">
   <div><strong>{escape(goal.title)}</strong><span>{escape(goal.priority)} | {escape(area_label(goal.category))}</span></div>
   <div class="stacked-bar">{segments}</div>
-  <small>{counts['done']} done | {counts['in_progress']} doing | {counts['blocked']} blocked | {counts['todo']} todo</small>
+  <small>{counts['done']} done | {counts['in_progress']} doing | {counts['on_hold']} on hold | {counts['blocked']} blocked | {counts['todo']} todo</small>
 </div>"""
             )
         body = "".join(rows)
@@ -2756,7 +2753,7 @@ def trigger_rank_chart(week_sessions: list[FocusSession]) -> str:
 
 
 def task_status_counts(goal: Goal) -> dict[str, int]:
-    counts = {"done": 0, "in_progress": 0, "blocked": 0, "todo": 0}
+    counts = {"done": 0, "in_progress": 0, "on_hold": 0, "blocked": 0, "todo": 0}
     for task in goal.tasks:
         if task.status in counts:
             counts[task.status] += 1
@@ -3051,7 +3048,7 @@ def research_session_steps(has_query: bool, has_reader: bool, saved_count: int) 
     )
     return f"""
 <section class="research-session panel">
-  <div><h3>Research session</h3><p>Search is only useful when it becomes a decision, memory, or next action.</p></div>
+  <div><h3>Research session</h3><p>Search is only useful when it becomes a decision, memory, or concrete task.</p></div>
   <div class="research-steps">{body}</div>
 </section>"""
 
@@ -3469,7 +3466,7 @@ def local_coach_answer(
         lines.append(f"4. Design around the repeated trigger '{top_trigger}'. Shrink the next task, change the environment, or create a pact before starting.")
     elif brain_profile.struggles:
         lines.append(f"4. Brain profile struggle to account for: {brain_profile.struggles.splitlines()[0].lstrip('- ')}")
-    lines.append(f"5. This week has {format_minutes(focus_minutes)} recorded. Judge the next action by whether it increases real traction, not planning complexity.")
+    lines.append(f"5. This week has {format_minutes(focus_minutes)} recorded. Judge the task list by whether it increases real traction, not planning complexity.")
     if search_memory:
         lines.append(f"Recent research memory available: {search_memory[-1].query}. Link it to a goal only if it changes a decision.")
     lines.append(f"Provider note: {provider_note}")
@@ -3727,7 +3724,7 @@ def today_queue_item(item: dict[str, Goal | Task | None | str], default_minutes:
   <input type="hidden" name="task_id" value="{task_id}">
   <button name="status" value="{status}" class="{'primary' if task.status == status else ''}">{label}</button>
 </form>"""
-            for status, label in [("in_progress", "Start"), ("done", "Done"), ("blocked", "Blocked")]
+            for status, label in [("in_progress", "Start"), ("done", "Done"), ("on_hold", "On hold"), ("blocked", "Blocked")]
         )
     return f"""
 <article class="item actionable">

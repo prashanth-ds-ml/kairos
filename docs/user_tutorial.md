@@ -44,7 +44,7 @@ For now, the web app is available and active development is CLI-first. The CLI i
 - Weekly supports capacity planning, goal allocation, and rollover.
 - Review includes weekly charts for focus trend, area balance, goal progress, outcome mix, trigger patterns, and focus consistency.
 - Areas works as a life scorecard with overview metrics first and editable area cards below.
-- Brain stores editable profile fields, confirmed memories, memory candidates, saved research, and a 121-question library.
+- Brain stores editable profile fields, confirmed memories, memory candidates, saved research, raw answers, personal-brain observations/patterns, and a 156-question library.
 - Research works as a lightweight Perplexity-style flow: ask a question, inspect sources, save the useful insight.
 - Coach uses Hugging Face Inference Providers with the configured `HF_MODEL`, and falls back to local guidance if the provider is unavailable.
 
@@ -52,7 +52,7 @@ For now, the web app is available and active development is CLI-first. The CLI i
 
 Kairos is moving toward a behavior-first design:
 
-- Today should show one next action, not every control.
+- Today should show the chosen daily operating mode, selected/captured work, and evidence, not every control.
 - Season should protect one primary track for 21 days.
 - North Star should be read-first, not form-first.
 - Weekly should prevent unrealistic planning.
@@ -75,7 +75,7 @@ kairos today plan
 kairos focus
 ```
 
-The home screen shows season, discipline progress, XP-style completed minutes, today's completed goals/tasks, and the next focus target. The timer command runs in the terminal, plays an alert when the focus block ends, saves the focus result, and updates the task status.
+The home screen shows season, discipline progress, XP-style completed minutes, today's completed goals/tasks, selected/captured work, and fast commands. The timer command runs in the terminal, plays an alert when the focus block ends, saves the focus result, and updates the task status.
 
 Before tracking real work, run `kairos status` and confirm storage is MongoDB when working across machines.
 

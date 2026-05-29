@@ -40,18 +40,18 @@ This means the app should not expose every useful control at once. It should dec
 | Today's queue | Holds 1-3 planned work items. | Prevents overplanning and forces prioritization. | Strong | Add ordering, drag/reorder, and "commit for today". |
 | Available work | Lists active goal tasks that can be added to today. | Gives the user a menu of meaningful work. | Useful | Add filters by priority, area, and due date. |
 | Auto-plan | Adds up to three focus candidates to today. | Reduces planning friction when the user feels stuck. | Basic | Make rules visible and favor P1/overdue/neglected areas. |
-| Next focus | Highlights one recommended focus target. | Reduces decision fatigue and helps the user start. | Strong | Make it the dominant top action on Today. |
+| Planned/flow mode | Lets the user choose a deliberate 1-3 commitment day or a flexible capture-as-you-go day. | Reduces decision fatigue without overriding the user's chosen operating mode. | Strong | Add focus by stable task reference and flow review cleanup. |
 | Season | Stores the 21-day primary track, support track, success evidence, constraints, paused goals, and checkpoint notes. | Turns broad ambition into a short validation cycle with clear tradeoffs. | Implemented | Drive Today auto-plan and Review evidence directly from Season. |
 | Focus timer | Runs a single-task timer with start, pause, reset, and complete. | Converts intention into timed execution. | Good | Add result capture and distraction logging. |
 | Complete focus block | Records minutes and marks selected task done. | Creates evidence of progress and rewards completion. | Good | Support partial completion and blocked outcomes. |
-| Goals | Creates goals with category, priority, target date, notes, and tasks. | Converts ambitions into executable projects. | Good | Add goal health, next action, and weekly commitment. |
+| Goals | Creates goals with category, priority, target date, notes, and concrete tasks. | Converts ambitions into executable projects. | Good | Add goal health and weekly commitment. |
 | Task status | Supports todo, doing, done, and blocked. | Makes work state visible and reduces hidden ambiguity. | Good | Add blocked reason and unblock next step. |
 | North Star | Stores long-term direction, identity, values, anti-vision, and priorities. | Connects daily work to identity and long-term direction. | Strong concept | Keep it read-first and let Season carry the current 21-day operating decision. |
 | Life areas | Tracks Career, Learning, Health, Money, Relationships, and Personal Systems. | Prevents career-only productivity and supports balanced growth. | Strong concept | Add weekly area budgets and attention warnings. |
 | Area weekly target minutes | Lets each area define expected weekly focus time. | Encourages intentional time allocation. | Basic | Compare target versus actual and recommend rebalancing. |
 | Area score | Rates each life area from 1-10. | Builds self-awareness and exposes neglected areas. | Basic | Trend score over time and prompt weekly reflection. |
 | Review | Shows weekly charts, completed sessions, planned vs actual, area balance, goal progress, triggers, and reflection prompts. | Turns behavior into learning and adjustment. | Implemented, needs sharper top insight | Lead with planned vs actual, main friction, best goal, neglected area, and suggested adjustment. |
-| Brain | Stores questionnaire answers, editable profile fields, confirmed memories, memory candidates, and saved research. | Builds a local cognitive mirror and improves personalization. | Implemented | Add forget/delete controls and more pattern summaries. |
+| Brain | Stores questionnaire answers, editable profile fields, confirmed memories, memory candidates, saved research, generated observations, and inferred patterns. | Builds a local cognitive mirror and improves personalization. | Implemented | Add forget/delete controls, pattern confirmation, and model correction prompts. |
 | Research | Source-backed search, read/save sessions backed by local SearXNG. | Keeps useful search findings attached to goals, areas, questions, and Brain memory. | Implemented | Make sessions feel closer to a Perplexity-style answer thread. |
 | Coach | Contextual guidance from Hugging Face or local fallback. | Reduces friction at the moment of action. | Implemented, resilient | Add embedded prompts on decision-heavy screens. |
 | Access key | Optional simple personal protection for hosted use. | Keeps a personal app private without multi-user complexity. | Practical | Document deployment setup clearly. |
@@ -199,13 +199,13 @@ The user learns how to plan better, not just work harder.
 ## Daily Loop
 
 1. Morning: choose intention, must-win, and 1-3 tasks.
-2. Work: start next focus block.
+2. Work: start a selected commitment or capture flow work.
 3. Completion: record result and actual minutes.
 4. Shutdown: capture outcome, carry forward unfinished work, close the day.
 
 Updated product requirement:
 
-Today should show only the next relevant step in this loop. It should not show every loop component at equal weight.
+Today should show the chosen operating mode, selected/captured work, and evidence. It should not force a recommended next item after the user has already chosen planned mode or flow mode.
 
 ## Weekly Loop
 

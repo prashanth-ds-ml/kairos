@@ -153,11 +153,11 @@ Each screen should answer one user question.
 
 | Screen | Primary question |
 | --- | --- |
-| Today | What should I do now? |
+| Today | Which mode am I using today, and what evidence exists? |
 | Focus | What am I doing for this block? |
 | Weekly | What is realistic this week? |
 | Review | What happened and what should change? |
-| Goals | What outcome am I moving and what is the next action? |
+| Goals | What outcome am I moving and what concrete tasks support it? |
 | Areas | Is my life balanced enough? |
 | North Star | Why does this matter? |
 | Coach | Where am I stuck and what is the next move? |
@@ -166,7 +166,7 @@ Each screen should answer one user question.
 
 Planning can support many options. Execution should not.
 
-Today should show one recommended next action. Focus should show one selected target. Backlog and target switching should be secondary.
+Today should show the selected operating mode: planned commitments or flow capture. Focus should show one selected target once the user starts a block. Backlog and target switching should be secondary.
 
 ### Principle 3: Make Starting Smaller
 
