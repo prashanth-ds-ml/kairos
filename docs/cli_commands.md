@@ -399,6 +399,8 @@ Start a 25-minute focus timer for target number 1:
 kairos focus start --target 1 --minutes 25
 ```
 
+The default timer uses one compact updating line to keep PowerShell history clean. Set `KAIROS_BIG_TIMER=1` to use the large full-screen ASCII countdown.
+
 Log focus without running the countdown:
 
 ```powershell

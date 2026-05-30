@@ -2832,10 +2832,14 @@ def print_focus_banner(title: str, minutes: int) -> None:
 
 def run_timer(minutes: int, title: str = "") -> None:
     remaining = minutes * 60
+    total_seconds = max(1, minutes * 60)
+    use_big_timer = os.environ.get("KAIROS_BIG_TIMER", "").strip().lower() in {"1", "true", "yes"}
+    if title and not use_big_timer:
+        print(f"FOCUS: {title[:72]}")
     while remaining > 0:
         mins, secs = divmod(remaining, 60)
         timer_text = f"{mins:02d}:{secs:02d}"
-        if sys.stdout.isatty():
+        if sys.stdout.isatty() and use_big_timer:
             print("\033[2J\033[H", end="")
             if title:
                 print(f"FOCUS: {title[:72]}")
@@ -2844,15 +2848,16 @@ def run_timer(minutes: int, title: str = "") -> None:
                 print(line)
             print("\nCtrl+C to stop the block early.")
         else:
-            print(f"\r{timer_text}", end="", flush=True)
+            elapsed = total_seconds - remaining
+            print(f"\r{timer_text} {timer_progress_bar(elapsed, total_seconds)}  Ctrl+C to stop", end="", flush=True)
         time.sleep(1)
         remaining -= 1
-    if sys.stdout.isatty():
+    if sys.stdout.isatty() and use_big_timer:
         print("\033[2J\033[H", end="")
         for line in render_big_timer("00:00"):
             print(line)
     else:
-        print("\r00:00")
+        print(f"\r00:00 {timer_progress_bar(total_seconds, total_seconds)}  complete          ")
 
 
 def render_big_timer(value: str) -> list[str]:
@@ -2863,6 +2868,11 @@ def render_big_timer(value: str) -> list[str]:
             rows[index] += line + "  "
     border = "+" + "-" * max(len(row) for row in rows) + "+"
     return [border] + [f"|{row.ljust(len(border) - 2)}|" for row in rows] + [border]
+
+
+def timer_progress_bar(elapsed: int, total: int, width: int = 24) -> str:
+    filled = min(width, max(0, round((elapsed / max(1, total)) * width)))
+    return "[" + "#" * filled + "-" * (width - filled) + "]"
 
 
 def alert() -> None:
